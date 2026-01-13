@@ -1,0 +1,21 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" 
+xmlns:form="sap.ui.layout.form"
+ xmlns:l="sap.ui.layout"
+xmlns:macros="sap.fe.macros">
+
+    <VBox >
+
+    <VBox class="sapUiMediumMarginTop" id="HBox1">
+    
+    </VBox>
+    <FlexBox justifyContent="End" id="FlexBox1">
+    
+    </FlexBox>
+
+    </VBox>
+    
+  
+ 
+
+
+</core:FragmentDefinition>

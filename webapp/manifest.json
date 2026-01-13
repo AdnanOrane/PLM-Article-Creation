@@ -1,0 +1,267 @@
+{
+    "_version": "1.40.0",
+    "sap.app": {
+        "id": "com.zmanprodlist",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.7.1",
+            "toolsId": "ccd96545-0ec7-4ccf-b8f9-a7befa56af77"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/sap/opu/odata4/sap/zui_man_product/srvd/sap/zsd_man_product/0001/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [
+                        "annotation"
+                    ],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            },
+            "annotation": {
+                "type": "ODataAnnotation",
+                "uri": "annotations/annotation.xml",
+                "settings": {
+                    "localUri": "annotations/annotation.xml"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": false,
+        "dependencies": {
+            "minUI5Version": "1.120.14",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "com.zmanprodlist.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "zc_cdsv_man_productList",
+                    "target": "zc_cdsv_man_productList"
+                },
+                {
+                    "pattern": "zc_cdsv_man_product({key}):?query:",
+                    "name": "zc_cdsv_man_productObjectPage",
+                    "target": "zc_cdsv_man_productObjectPage"
+                },
+                {
+                    "pattern": "zc_cdsv_man_product({key})/_Unitofmes({key2}):?query:",
+                    "name": "ZC_CDSV_BASEUNITObjectPage",
+                    "target": "ZC_CDSV_BASEUNITObjectPage"
+                },
+                {
+                    "pattern": "zc_cdsv_man_product({key})/_Season({key2}):?query:",
+                    "name": "ZC_CDSV_SEASONObjectPage",
+                    "target": "ZC_CDSV_SEASONObjectPage"
+                },
+                {
+                    "pattern": "zc_cdsv_man_product({key})/_Variant({key2}):?query:",
+                    "name": "ZC_CDSV_VARIANTObjectPage",
+                    "target": "ZC_CDSV_VARIANTObjectPage"
+                },
+                {
+                    "pattern": "zc_cdsv_man_product({key})/_Attachment({key2}):?query:",
+                    "name": "ZC_CDSV_PROD_ATTACHMENTObjectPage",
+                    "target": "ZC_CDSV_PROD_ATTACHMENTObjectPage"
+                }
+            ],
+            "targets": {
+                "zc_cdsv_man_productList": {
+                    "type": "Component",
+                    "id": "zc_cdsv_man_productList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "zc_cdsv_man_product",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "zc_cdsv_man_product": {
+                                    "detail": {
+                                        "route": "zc_cdsv_man_productObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "zc_cdsv_man_productObjectPage": {
+                    "type": "Component",
+                    "id": "zc_cdsv_man_productObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "zc_cdsv_man_product",
+                            "navigation": {
+                                "_Season": {
+                                    "detail": {
+                                        "route": "ZC_CDSV_SEASONObjectPage"
+                                    }
+                                },
+                                "_Unitofmes": {
+                                    "detail": {
+                                        "route": "ZC_CDSV_BASEUNITObjectPage"
+                                    }
+                                },
+                                "_Attachment": {
+                                    "detail": {
+                                        "route": "ZC_CDSV_PROD_ATTACHMENTObjectPage"
+                                    }
+                                }
+                            },
+                            "content": {
+                                "body": {
+                                    "sections": {
+                                        "Classification": {
+                                            "template": "com.zmanprodlist.ext.fragment.Classification",
+                                            "position": {
+                                                "placement": "After",
+                                                "anchor": "Charvalues"
+                                            },
+                                            "title": "Attributes"
+                                        }
+                                    }
+                                },
+                                "header": {
+                                    "facets": {
+                                        "ProductImage": {
+                                            "template": "com.zmanprodlist.ext.fragment.ProductImage",
+                                            "stashed": false,
+                                            "requestGroupId": "Heroes",
+                                            "flexSettings": {
+                                                "designtime": "Default"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ZC_CDSV_BASEUNITObjectPage": {
+                    "type": "Component",
+                    "id": "ZC_CDSV_BASEUNITObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "ZC_CDSV_BASEUNIT"
+                        }
+                    }
+                },
+                "ZC_CDSV_SEASONObjectPage": {
+                    "type": "Component",
+                    "id": "ZC_CDSV_SEASONObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "ZC_CDSV_SEASON"
+                        }
+                    }
+                },
+                "ZC_CDSV_VARIANTObjectPage": {
+                    "type": "Component",
+                    "id": "ZC_CDSV_VARIANTObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "ZC_CDSV_VARIANT",
+                            "navigationProperty": "to_Variant",
+                            "createMode": "inline"
+                        }
+                    }
+                },
+                "ZC_CDSV_PROD_ATTACHMENTObjectPage": {
+                    "type": "Component",
+                    "id": "ZC_CDSV_PROD_ATTACHMENTObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "ZC_CDSV_PROD_ATTACHMENT"
+                        }
+                    }
+                }
+            }
+        },
+        "extends": {
+            "extensions": {
+                "sap.ui.controllerExtensions": {
+                    "sap.fe.templates.ObjectPage.ObjectPageController#com.zmanprodlist::zc_cdsv_man_productObjectPage": {
+                        "controllerName": "com.zmanprodlist.ext.controller.Classification"
+                    },
+                    "sap.fe.templates.ListReport.ListReportController": {
+                        "controllerName": "com.zmanprodlist.ext.controller.ListManProduct"
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}
