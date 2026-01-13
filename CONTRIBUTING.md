@@ -2,6 +2,37 @@
 
 Welcome to the team! To ensure a smooth workflow and maintain code quality, please follow these guidelines when contributing to this project.
 
+## Getting Started
+
+New to the project? Follow these steps to get your development environment set up:
+
+1.  **Clone the repository**:
+
+    ```bash
+    git clone <repository-url>
+    cd <repository-directory>
+    ```
+
+2.  **Install dependencies**:
+
+    ```bash
+    npm install
+    ```
+
+3.  **Run the application**:
+
+    ```bash
+    npm start
+    ```
+
+    This will start a local server and open the application in your default browser.
+
+    > **Note**: If you need to run with a local configuration (e.g., usually for mocking backend data), use:
+    >
+    > ```bash
+    > npm run start-local
+    > ```
+
 ## Branching Strategy
 
 We use a simplified workflow centered around a **development branch (`dev`)**.
@@ -41,11 +72,21 @@ We use a simplified workflow centered around a **development branch (`dev`)**.
 
 5.  **Create a Pull Request (PR)**:
 
-    - Target the **`dev`** branch (NOT `main`).
-    - Add a description of your changes.
-    - Request a review from a team member.
+    When you are ready to submit your changes, follow these steps:
 
-6.  **Merge**: Once approved, your code will be merged into `dev`.
+    - Go to the repository on GitHub.
+    - Click the **"Pull requests"** tab and then **"New pull request"**.
+    - **Crucial Step**: Change the "base" branch to **`dev`**. Do NOT target `main`.
+    - Select your feature branch as the "compare" branch.
+    - Give your PR a clear title and helpful description explaining your changes.
+    - Request a review from a team member on the right sidebar.
+
+6.  **Merge Process**:
+
+    - **Wait for Review**: A team member will review your code. Address any feedback they provide.
+    - **Approval**: Once the reviewer approves your PR, it is ready to be merged.
+    - **Merging**: Typically, a project maintainer will perform the merge into `dev`.
+    - **Delete Branch**: After a successful merge, you can safely delete your feature branch.
 
 ## Coding Standards
 
