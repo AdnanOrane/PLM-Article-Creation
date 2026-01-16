@@ -55,15 +55,33 @@ sap.ui.define(
               var oResultModel = new sap.ui.model.json.JSONModel();
               var that = this;
 
-              oModel.read("/classificationSet", {
-                filters: [
-                  new sap.ui.model.Filter(
-                    "Productuuid",
-                    sap.ui.model.FilterOperator.EQ,
-                    Productuuid
-                  ),
-                  // new sap.ui.model.Filter("Material", sap.ui.model.FilterOperator.EQ, ProductId)
-                ],
+                // Fetch ReadOnly Attributes first
+                var aReadOnlyChars = [];
+                oModel.read("/ReadOnlyCharSetSet", {
+                    success: function (oDataRO) {
+                        if (oDataRO && oDataRO.results) {
+                            aReadOnlyChars = oDataRO.results.map(function (item) {
+                                return item.Charname; 
+                            });
+                        }
+                        _triggerClassificationRead();
+                    },
+                    error: function () {
+                         console.error("Failed to fetch ReadOnlyCharSet");
+                         _triggerClassificationRead();
+                    }
+                });
+
+                function _triggerClassificationRead() {
+                  oModel.read("/classificationSet", {
+                    filters: [
+                      new sap.ui.model.Filter(
+                        "Productuuid",
+                        sap.ui.model.FilterOperator.EQ,
+                        Productuuid
+                      ),
+                      // new sap.ui.model.Filter("Material", sap.ui.model.FilterOperator.EQ, ProductId)
+                    ],
                 success: function (oData, oResponse) {
                   oResultModel.setData(oData.results);
                   // var oForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
@@ -83,6 +101,7 @@ sap.ui.define(
                     if (item.charecteristics != "") {
                       oCharval.charecteristics = item.charecteristics;
                       oCharval.charvalues = item.charvalues;
+                      oCharval.charname = item.charname;
                       oCharGroup[item.classname].push(oCharval);
                     }
                   });
@@ -165,7 +184,7 @@ sap.ui.define(
                         showValueHelp: true,
                         width: "10rem",
                         name: "input_" + index,
-                        editable: "{viewState>/showForm}",
+                        editable: aReadOnlyChars.includes(field.charname) ? false : "{viewState>/showForm}",
                         valueHelpRequest: that.onValueHelpRequest.bind(that),
                       });
                       // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
@@ -195,6 +214,7 @@ sap.ui.define(
                   console.error("Error fetching data:", oError);
                 },
               });
+            }
             },
             onBeforeNavigation: function (oEvent) {
               debugger;
