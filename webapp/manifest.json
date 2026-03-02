@@ -134,6 +134,7 @@
                     "options": {
                         "settings": {
                             "entitySet": "zc_cdsv_man_product",
+                            "enhanceI18n": "i18n/ListPage/i18n.properties",
                             "variantManagement": "Page",
                             "navigation": {
                                 "zc_cdsv_man_product": {
@@ -195,6 +196,36 @@
                                         }
                                     }
                                 }
+                            },
+                            "controlConfiguration": {
+                                "_Unitofmes/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "creationMode": {
+                                            "name": "Inline"
+                                        }
+                                    }
+                                },
+                                "_Attachment/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "creationMode": {
+                                            "name": "Inline"
+                                        }
+                                    }
+                                },
+                                "_Season/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "creationMode": {
+                                            "name": "InlineCreationRows"
+                                        }
+                                    }
+                                },
+                                "_Variant/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "creationMode": {
+                                            "name": "InlineCreationRows"
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -217,7 +248,8 @@
                     "options": {
                         "settings": {
                             "editableHeaderContent": false,
-                            "entitySet": "ZC_CDSV_SEASON"
+                            "entitySet": "ZC_CDSV_SEASON",
+                            "enhanceI18n": "i18n/ObjectPage/Season/i18n.properties"
                         }
                     }
                 },
@@ -230,7 +262,8 @@
                             "editableHeaderContent": false,
                             "entitySet": "ZC_CDSV_VARIANT",
                             "navigationProperty": "to_Variant",
-                            "createMode": "inline"
+                            "createMode": "inline",
+                            "enhanceI18n": "i18n/ObjectPage/Variant/i18n.properties"
                         }
                     }
                 },

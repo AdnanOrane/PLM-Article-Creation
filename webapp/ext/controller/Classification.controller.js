@@ -23,13 +23,13 @@ sap.ui.define(
               var oButton = this.base
                 .getView()
                 .byId(
-                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--AddClassnew"
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--AddClassnew",
                 );
 
               var oForm = this.base
                 .getView()
                 .byId(
-                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter"
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter",
                 );
               // var bHasInputs = oForm.getContent().some(function (oControl) {
               //     return oControl instanceof sap.m.Input;
@@ -42,11 +42,21 @@ sap.ui.define(
               var oModelPG = oViewPG.getModel();
               var oContextPG = oViewPG.getBindingContext();
               var sPath = oContextPG.getPath();
-              const match = sPath.match(/styleuuid=([a-f0-9-]+)/i);
-              // var ProductId = decodeURIComponent(sPath.match(/product='(.*?)'/)[1]);
-              if (match && match[1]) {
-                var Productuuid = match[1];
+
+              var styleuuid = "";
+              const matchStyleUuid = sPath.match(/styleuuid=([a-f0-9-]+)/i);
+              if (matchStyleUuid && matchStyleUuid[1]) {
+                styleuuid = matchStyleUuid[1];
               }
+
+              var styleid = "";
+              const matchStyleId = sPath.match(/styleid='(.*?)'/i);
+              if (matchStyleId && matchStyleId[1]) {
+                styleid = decodeURIComponent(matchStyleId[1]);
+              }
+
+              // Keeping Productuuid assigned to styleuuid for existing logical compatibility
+              var Productuuid = styleuuid;
 
               const oView = this.getView();
               var oModel = new sap.ui.model.odata.v2.ODataModel({
@@ -55,166 +65,198 @@ sap.ui.define(
               var oResultModel = new sap.ui.model.json.JSONModel();
               var that = this;
 
-                // Fetch ReadOnly Attributes first
-                var aReadOnlyChars = [];
-                oModel.read("/ReadOnlyCharSetSet", {
-                    success: function (oDataRO) {
-                        if (oDataRO && oDataRO.results) {
-                            aReadOnlyChars = oDataRO.results.map(function (item) {
-                                return item.Charname; 
-                            });
-                        }
-                        _triggerClassificationRead();
-                    },
-                    error: function () {
-                         console.error("Failed to fetch ReadOnlyCharSet");
-                         _triggerClassificationRead();
-                    }
-                });
-
-                function _triggerClassificationRead() {
-                  oModel.read("/classificationSet", {
-                    filters: [
-                      new sap.ui.model.Filter(
-                        "Productuuid",
-                        sap.ui.model.FilterOperator.EQ,
-                        Productuuid
-                      ),
-                      // new sap.ui.model.Filter("Material", sap.ui.model.FilterOperator.EQ, ProductId)
-                    ],
-                success: function (oData, oResponse) {
-                  oResultModel.setData(oData.results);
-                  // var oForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
-                  // var bHasInputs = oForm.getContent().some(function (oControl) {
-                  //     return oControl instanceof sap.m.Input;
-                  // });;
-
-                  that.getView().setModel(oResultModel, "classSet");
-                  const oCharGroup = {};
-                  var oRole;
-                  oData.results.forEach((item) => {
-                    oRole = item.Role;
-                    if (!oCharGroup[item.classname]) {
-                      oCharGroup[item.classname] = [];
-                    }
-                    var oCharval = {};
-                    if (item.charecteristics != "") {
-                      oCharval.charecteristics = item.charecteristics;
-                      oCharval.charvalues = item.charvalues;
-                      oCharval.charname = item.charname;
-                      oCharGroup[item.classname].push(oCharval);
-                    }
-                  });
-
-                  var oHBox1 = that
-                    .getView()
-                    .byId(
-                      "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1"
-                    );
-                  var oFlexBox = that
-                    .getView()
-                    .byId(
-                      "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--FlexBox1"
-                    );
-                  // var oSimpleForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
-
-                  //    oSimpleForm.destroyContent( );
-
-                  oHBox1.destroyItems();
-                  oFlexBox.destroyItems();
-                  var oEdit = that.getView().byId("fe::StandardAction::Edit");
-                  var oDelete = that
-                    .getView()
-                    .byId("fe::StandardAction::Delete");
-                  var oEditBut = oEdit.mProperties;
-                  if (oEditBut.visible === false && oRole != "APPROVER") {
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", true);
-                    var oButton = new sap.m.Button({
-                      text: "Add Attributes",
-                      press: that.onAddCharacteristic.bind(that),
+              // Fetch ReadOnly Attributes first
+              var aReadOnlyChars = [];
+              oModel.read("/ReadOnlyCharSetSet", {
+                success: function (oDataRO) {
+                  if (oDataRO && oDataRO.results) {
+                    aReadOnlyChars = oDataRO.results.map(function (item) {
+                      return item.Charname;
                     });
-                    oButton.setLayoutData(
-                      new sap.ui.layout.GridData({
-                        span: "XL2 L2 M3 S12",
-                      })
-                    );
-
-                    // oSimpleForm.addContent(oButton);
-                  } else if (oEditBut.visible === true && oRole == "APPROVER") {
-                    oEdit.setVisible(false);
-                    oEdit.setEnabled(false);
-                    oDelete.setVisible(false);
-                    oDelete.setEnabled(false);
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", false);
-                  } else if (oEditBut.visible === true) {
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", false);
                   }
-
-                  Object.keys(oCharGroup).forEach((item) => {
-                    var oSimpleForm = new sap.ui.layout.form.SimpleForm({
-                      layout: "ColumnLayout",
-                      columnsM: 2,
-                      columnsL: 3,
-                      columnsXL: 4,
-                    });
-
-                    oSimpleForm.addContent(
-                      new sap.ui.core.Title({
-                        text: item,
-                      })
-                    );
-                    oCharGroup[item].forEach((field, index) => {
-                      console.log("FieldIndex", field);
-
-                      var oLabel = new sap.m.Label({
-                        text: field.charecteristics,
-                      });
-
-                      var oInput = new sap.m.Input({
-                        value: field.charvalues,
-                        showValueHelp: true,
-                        width: "10rem",
-                        name: "input_" + index,
-                        editable: aReadOnlyChars.includes(field.charname) ? false : "{viewState>/showForm}",
-                        valueHelpRequest: that.onValueHelpRequest.bind(that),
-                      });
-                      // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
-                      // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
-                      // oLabel.setLayoutData(new sap.ui.layout.GridData({
-                      //     // span: "L3 M3 S12"
-                      //     span: "XL4 L2 M4 S6"
-                      // }));
-                      // oInput.setLayoutData(new sap.ui.layout.GridData({
-                      //     // span: "L9 M9 S12"
-                      //     span: "XL4 L2 M4 S6"
-                      // }));
-
-                      oSimpleForm.addContent(oLabel);
-                      oSimpleForm.addContent(oInput);
-                    });
-                    oHBox1.addItem(oSimpleForm);
-                  });
-                  // oVBox1.addItem(oSimpleForm);
-                  // oSimpleForm.addContent(oHBox1);
-                  oFlexBox.addItem(oButton);
-                  console.log("Data fetched successfully:", oData);
-                  //   }
+                  _triggerClassificationRead();
                 },
-                error: function (oError) {
-                  // Handle error
-                  console.error("Error fetching data:", oError);
+                error: function () {
+                  console.error("Failed to fetch ReadOnlyCharSet");
+                  _triggerClassificationRead();
                 },
               });
-            }
+
+              function _triggerClassificationRead() {
+                var aFilters = [
+                  new sap.ui.model.Filter(
+                    "Productuuid",
+                    sap.ui.model.FilterOperator.EQ,
+                    Productuuid,
+                  ),
+                ];
+
+                if (styleuuid) {
+                  aFilters.push(
+                    new sap.ui.model.Filter(
+                      "styleuuid",
+                      sap.ui.model.FilterOperator.EQ,
+                      styleuuid,
+                    ),
+                  );
+                }
+
+                if (styleid) {
+                  aFilters.push(
+                    new sap.ui.model.Filter(
+                      "styleid",
+                      sap.ui.model.FilterOperator.EQ,
+                      styleid,
+                    ),
+                  );
+                }
+
+                oModel.read("/classificationSet", {
+                  filters: aFilters,
+                  success: function (oData, oResponse) {
+                    oResultModel.setData(oData.results);
+                    // var oForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
+                    // var bHasInputs = oForm.getContent().some(function (oControl) {
+                    //     return oControl instanceof sap.m.Input;
+                    // });;
+
+                    that.getView().setModel(oResultModel, "classSet");
+                    const oCharGroup = {};
+                    var oRole;
+                    oData.results.forEach((item) => {
+                      oRole = item.Role;
+                      if (!oCharGroup[item.classname]) {
+                        oCharGroup[item.classname] = [];
+                      }
+                      var oCharval = {};
+                      if (item.charecteristics != "") {
+                        oCharval.charecteristics = item.charecteristics;
+                        oCharval.charvalues = item.charvalues;
+                        oCharval.charname = item.charname;
+                        oCharGroup[item.classname].push(oCharval);
+                      }
+                    });
+
+                    var oHBox1 = that
+                      .getView()
+                      .byId(
+                        "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1",
+                      );
+                    var oFlexBox = that
+                      .getView()
+                      .byId(
+                        "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--FlexBox1",
+                      );
+                    // var oSimpleForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
+
+                    //    oSimpleForm.destroyContent( );
+
+                    oHBox1.destroyItems();
+                    oFlexBox.destroyItems();
+                    var oEdit = that.getView().byId("fe::StandardAction::Edit");
+                    var oDelete = that
+                      .getView()
+                      .byId("fe::StandardAction::Delete");
+                    var oEditBut = oEdit.mProperties;
+                    if (oEditBut.visible === false && oRole != "APPROVER") {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", true);
+                      var oButton = new sap.m.Button({
+                        text: "Add Attributes",
+                        press: that.onAddCharacteristic.bind(that),
+                      });
+                      oButton.setLayoutData(
+                        new sap.ui.layout.GridData({
+                          span: "XL2 L2 M3 S12",
+                        }),
+                      );
+
+                      // oSimpleForm.addContent(oButton);
+                    } else if (
+                      oEditBut.visible === true &&
+                      oRole == "APPROVER"
+                    ) {
+                      oEdit.setVisible(false);
+                      oEdit.setEnabled(false);
+                      oDelete.setVisible(false);
+                      oDelete.setEnabled(false);
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    } else if (oEditBut.visible === true) {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    }
+
+                    Object.keys(oCharGroup).forEach((item) => {
+                      var oSimpleForm = new sap.ui.layout.form.SimpleForm({
+                        layout: "ColumnLayout",
+                        columnsM: 2,
+                        columnsL: 3,
+                        columnsXL: 4,
+                      });
+
+                      oSimpleForm.addContent(
+                        new sap.ui.core.Title({
+                          text: item,
+                        }),
+                      );
+                      oCharGroup[item].forEach((field, index) => {
+                        console.log("FieldIndex", field);
+
+                        var oLabel = new sap.m.Label({
+                          text: field.charecteristics,
+                        });
+
+                        var oInput = new sap.m.Input({
+                          value: field.charvalues,
+                          showValueHelp: true,
+                          width: "10rem",
+                          name: "input_" + index,
+                          editable: aReadOnlyChars.includes(field.charname)
+                            ? false
+                            : "{viewState>/showForm}",
+                          valueHelpRequest: that.onValueHelpRequest.bind(that),
+                        });
+                        // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
+                        // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
+                        // oLabel.setLayoutData(new sap.ui.layout.GridData({
+                        //     // span: "L3 M3 S12"
+                        //     span: "XL4 L2 M4 S6"
+                        // }));
+                        // oInput.setLayoutData(new sap.ui.layout.GridData({
+                        //     // span: "L9 M9 S12"
+                        //     span: "XL4 L2 M4 S6"
+                        // }));
+
+                        oSimpleForm.addContent(oLabel);
+                        oSimpleForm.addContent(oInput);
+                      });
+                      oHBox1.addItem(oSimpleForm);
+                    });
+                    // oVBox1.addItem(oSimpleForm);
+                    // oSimpleForm.addContent(oHBox1);
+                    oFlexBox.addItem(oButton);
+                    console.log(
+                      "classification Data fetched successfully:",
+                      oData,
+                    );
+                    //   }
+                  },
+                  error: function (oError) {
+                    // Handle error
+                    console.error(
+                      "Error fetching classification data:",
+                      oError,
+                    );
+                  },
+                });
+              }
             },
             onBeforeNavigation: function (oEvent) {
               debugger;
@@ -252,7 +294,7 @@ sap.ui.define(
               new sap.ui.model.Filter(
                 "key",
                 sap.ui.model.FilterOperator.EQ,
-                strLabel
+                strLabel,
               ),
             ],
             success: function (oData) {
@@ -277,7 +319,7 @@ sap.ui.define(
                     var oFilter = new sap.ui.model.Filter(
                       "desc",
                       sap.ui.model.FilterOperator.Contains,
-                      sValue
+                      sValue,
                     );
                     var oBinding = oEvent.getSource().getBinding("items");
                     oBinding.filter([oFilter]);
@@ -311,7 +353,7 @@ sap.ui.define(
           var oContext = oView.getBindingContext();
           //var oVBox = oView.byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--vBox1");
           var oPanel = this.getView().byId(
-            "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1"
+            "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1",
           );
           var aInputs = oPanel.findAggregatedObjects(true, function (oControl) {
             return oControl.isA("sap.m.Input");
@@ -379,7 +421,7 @@ sap.ui.define(
 
           //             this.getView().getModel("viewState").setProperty("/showForm", false);
         },
-      }
+      },
     );
-  }
+  },
 );
