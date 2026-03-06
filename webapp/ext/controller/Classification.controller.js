@@ -20,6 +20,25 @@ sap.ui.define(
 
           routing: {
             onAfterBinding: function (oContext) {
+              // Rename attachment create button to "Add" for better clarity in the UI
+              var oAttachCreate = this.base
+                .getView()
+                .byId(
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::table::_Attachment::LineItem::StandardAction::Create",
+                );
+              if (oAttachCreate) {
+                oAttachCreate.setText("Add");
+              }
+              // Reanme "Create" button to "Add UOM" in classification section for better clarity
+              var oUOMCreate = this.base
+                .getView()
+                .byId(
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::table::_Unitofmes::LineItem::StandardAction::Create",
+                );
+              if (oUOMCreate) {
+                oUOMCreate.setText("Add");
+              }
+
               var oButton = this.base
                 .getView()
                 .byId(
@@ -209,8 +228,22 @@ sap.ui.define(
                       oCharGroup[item].forEach((field, index) => {
                         console.log("FieldIndex", field);
 
+                        var bRequired = false;
+
+                        if (field.charecteristics) {
+                          var sChar = field.charecteristics.toLowerCase();
+                          if (
+                            sChar === "shellfabric2" ||
+                            sChar === "shellfabric3" ||
+                            sChar === "shell fabric 1"
+                          ) {
+                            bRequired = true;
+                          }
+                        }
+
                         var oLabel = new sap.m.Label({
                           text: field.charecteristics,
+                          required: bRequired,
                         });
 
                         var oInput = new sap.m.Input({
@@ -258,12 +291,9 @@ sap.ui.define(
                 });
               }
             },
-            onBeforeNavigation: function (oEvent) {
-              debugger;
-            },
+            onBeforeNavigation: function (oEvent) {},
           },
         },
-
         onValueHelpRequest: function (oEvent) {
           var oInput = oEvent.getSource();
           var oInp = oEvent.getSource();
@@ -401,19 +431,42 @@ sap.ui.define(
               .getModel("viewState")
               .setProperty("/showForm", false);
             MessageToast.show("Charecteristics is saved");
-            oCharBinding.requestContexts(0, 100).then(function (aContexts) {
-              aCharValues.forEach(function (oNewChar, index) {
-                if (aContexts.length === 0) {
-                  oCharBinding.create(oNewChar);
-                } else {
-                  var oCntx = aContexts[index];
-                  var oChar = oCntx.getObject();
 
-                  if (oChar.Charname === oNewChar.Charname) {
-                    // Update existing
-                    oCntx.setProperty("Charvalue", oNewChar.Charvalue);
-                    oCntx.setProperty("Charname", oNewChar.Charname);
-                  }
+            // oCharBinding.requestContexts(0, 100).then(function (aContexts) {
+            //   aCharValues.forEach(function (oNewChar, index) {
+            //     if (aContexts.length === 0) {
+            //       oCharBinding.create(oNewChar);
+            //     } else {
+            //       var oCntx = aContexts[index];
+            //       var oChar = oCntx.getObject();
+
+            //       if (oChar.Charname === oNewChar.Charname) {
+            //         // Update existing
+            //         oCntx.setProperty("Charvalue", oNewChar.Charvalue);
+            //         oCntx.setProperty("Charname", oNewChar.Charname);
+            //       }
+            //     }
+            //   });
+            // });
+
+            oCharBinding.requestContexts(0, 100).then(function (aContexts) {
+              var oContextMap = {};
+              aContexts.forEach(function (oCtx) {
+                var oChar = oCtx.getObject();
+                if (oChar && oChar.Charname) {
+                  oContextMap[oChar.Charname] = oCtx;
+                }
+              });
+
+              aCharValues.forEach(function (oNewChar) {
+                var oExistingContext =
+                  oContextMap[oNewChar.Charname.toUpperCase()];
+
+                if (oExistingContext) {
+                  oExistingContext.setProperty("Charvalue", oNewChar.Charvalue);
+                  oExistingContext.setProperty("Charname", oNewChar.Charname);
+                } else {
+                  oCharBinding.create(oNewChar);
                 }
               });
             });
