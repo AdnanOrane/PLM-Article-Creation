@@ -182,17 +182,6 @@ sap.ui.define(
                         .getView()
                         .getModel("viewState")
                         .setProperty("/showForm", true);
-                      var oButton = new sap.m.Button({
-                        text: "Add Attributes",
-                        press: that.onAddCharacteristic.bind(that),
-                      });
-                      oButton.setLayoutData(
-                        new sap.ui.layout.GridData({
-                          span: "XL2 L2 M3 S12",
-                        }),
-                      );
-
-                      // oSimpleForm.addContent(oButton);
                     } else if (
                       oEditBut.visible === true &&
                       oRole == "APPROVER"
@@ -250,11 +239,12 @@ sap.ui.define(
                           value: field.charvalues,
                           showValueHelp: true,
                           width: "10rem",
-                          name: "input_" + index,
+                          name: field.charname,
                           editable: aReadOnlyChars.includes(field.charname)
                             ? false
                             : "{viewState>/showForm}",
                           valueHelpRequest: that.onValueHelpRequest.bind(that),
+                          change: that.onCharacteristicChange.bind(that),
                         });
                         // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
                         // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
@@ -274,7 +264,6 @@ sap.ui.define(
                     });
                     // oVBox1.addItem(oSimpleForm);
                     // oSimpleForm.addContent(oHBox1);
-                    oFlexBox.addItem(oButton);
                     console.log(
                       "classification Data fetched successfully:",
                       oData,
@@ -358,6 +347,7 @@ sap.ui.define(
                     var oSelectedItem = oEvent.getParameter("selectedItem");
                     if (oSelectedItem) {
                       oInput.setValue(oSelectedItem.getTitle());
+                      oInput.fireChange({ value: oSelectedItem.getTitle() });
                     }
                     that._oValueHelpDialog = null;
                   },
@@ -377,102 +367,40 @@ sap.ui.define(
           });
         },
 
-        onAddCharacteristic: function (oEvent) {
+        onCharacteristicChange: function (oEvent) {
+          var oInput = oEvent.getSource();
           var oView = this.base.getView();
           var oModel = oView.getModel();
           var oContext = oView.getBindingContext();
-          //var oVBox = oView.byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--vBox1");
-          var oPanel = this.getView().byId(
-            "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1",
-          );
-          var aInputs = oPanel.findAggregatedObjects(true, function (oControl) {
-            return oControl.isA("sap.m.Input");
-          });
 
-          var oPayload = {};
-          //    var aCharValues = [];
-          //    aInputs.forEach(function (oInput) {
-          //        var sCharVal = oInput.getValue();
-          //       var  sCharName =oInput.oParent.mAggregations.label.getText( );
-          //         aCharValues.push({CharName : sCharName,CharValue : sCharVal});
-          //     });
+          var sCharName = oInput.getName();
+          var sValue = oInput.getValue() || "";
+
           var sPath = oContext.getPath() + "/_charecteristics";
-          const match = sPath.match(/styleuuid=([a-f0-9-]+)/i);
-          // var ProductId = decodeURIComponent(sPath.match(/product='(.*?)'/)[1]);
-          if (match && match[1]) {
-            var Productuuid = match[1];
-          }
-          var aCharValues = aInputs.map(function (oInput) {
-            var sLabel = oInput.oParent.mAggregations.label.getText(); // assumes label is sibling
-            return {
-              Charname: sLabel,
-              Charvalue: oInput.getValue(),
-            };
-          });
-          // var oCharBinding = oModel.bindList(oContext.getPath() + "/_charecteristics", oContext, {
-          //     $$groupId: "updateGroup"
-          // });
 
-          var oCharBinding = oModel.bindList(sPath, {
-            sorters: [
-              {
-                path: "charname",
-              },
-            ],
-          });
-          var oEnableChar = this.getView()
-            .getModel("viewState")
-            .getProperty("/showForm");
-          if (oEnableChar === false) {
-            this.getView().getModel("viewState").setProperty("/showForm", true);
-            MessageToast.show("Charecteristics is Enabled");
-          } else {
-            this.getView()
-              .getModel("viewState")
-              .setProperty("/showForm", false);
-            MessageToast.show("Charecteristics is saved");
+          var oCharBinding = oModel.bindList(sPath);
 
-            // oCharBinding.requestContexts(0, 100).then(function (aContexts) {
-            //   aCharValues.forEach(function (oNewChar, index) {
-            //     if (aContexts.length === 0) {
-            //       oCharBinding.create(oNewChar);
-            //     } else {
-            //       var oCntx = aContexts[index];
-            //       var oChar = oCntx.getObject();
-
-            //       if (oChar.Charname === oNewChar.Charname) {
-            //         // Update existing
-            //         oCntx.setProperty("Charvalue", oNewChar.Charvalue);
-            //         oCntx.setProperty("Charname", oNewChar.Charname);
-            //       }
-            //     }
-            //   });
-            // });
-
-            oCharBinding.requestContexts(0, 100).then(function (aContexts) {
-              var oContextMap = {};
-              aContexts.forEach(function (oCtx) {
-                var oChar = oCtx.getObject();
-                if (oChar && oChar.Charname) {
-                  oContextMap[oChar.Charname] = oCtx;
-                }
-              });
-
-              aCharValues.forEach(function (oNewChar) {
-                var oExistingContext =
-                  oContextMap[oNewChar.Charname.toUpperCase()];
-
-                if (oExistingContext) {
-                  oExistingContext.setProperty("Charvalue", oNewChar.Charvalue);
-                  oExistingContext.setProperty("Charname", oNewChar.Charname);
-                } else {
-                  oCharBinding.create(oNewChar);
-                }
-              });
+          oCharBinding.requestContexts(0, 500).then(function (aContexts) {
+            var oExistingContext = null;
+            
+            aContexts.forEach(function (oCtx) {
+              var sCtxCharName = oCtx.getProperty("Charname");
+              if (sCtxCharName && sCtxCharName.toUpperCase() === sCharName.toUpperCase()) {
+                oExistingContext = oCtx;
+              }
             });
-          }
 
-          //             this.getView().getModel("viewState").setProperty("/showForm", false);
+            if (oExistingContext) {
+              if (oExistingContext.getProperty("Charvalue") !== sValue) {
+                oExistingContext.setProperty("Charvalue", sValue);
+              }
+            } else {
+              oCharBinding.create({
+                Charname: sCharName,
+                Charvalue: sValue
+              });
+            }
+          });
         },
       },
     );
