@@ -1,10 +1,11 @@
 <core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:macros="sap.fe.macros">
-	<VBox>
+	<HBox alignItems="Start" wrap="Wrap">
 	  <Avatar id="_IDGenAvatar"
        src="{ProductImage}"
        displaySize="XL"
        displayShape="Square"
        imageFitType="Contain"
+       class="sapUiMediumMarginEnd"
        >
       <detailBox>
        <LightBox id="_IDGenLightBox">
@@ -18,10 +19,37 @@
        </LightBox>
       </detailBox>
      </Avatar>
-     <Text id="_IDGenText1"
-       textAlign="Center"
-       text=""
-       class="sapUiSmallMarginTop"
-       />
-	</VBox>
+     <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Product Description:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{ProductDescription}" />
+       </HBox>
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Product Group:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{ProductGroup}" />
+       </HBox>
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Status:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{Status}" />
+       </HBox>
+      </VBox>
+      <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Created By:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{CreatedByUser}" />
+       </HBox>
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Creation Date:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{CreationDate}" />
+       </HBox>
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Last Changed By:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{LastChangedByUser}" />
+       </HBox>
+       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
+         <Label text="Last Change Date:" class="sapUiTinyMarginEnd" design="Bold"/>
+         <Text text="{LastChangeDate}" />
+       </HBox>
+     </VBox>
+	</HBox>
 </core:FragmentDefinition>
