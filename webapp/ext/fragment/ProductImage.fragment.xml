@@ -2,15 +2,18 @@
 	<VBox>
 	  <Avatar id="_IDGenAvatar"
        src="{ProductImage}"
-       displaySize="L"
-       displayShape="Circle">
+       displaySize="XL"
+       displayShape="Square"
+       imageFitType="Contain"
+       >
       <detailBox>
        <LightBox id="_IDGenLightBox">
         <LightBoxItem id="_IDGenLightBoxItem"
-          imageSrc="{ProductImage}"
+           imageSrc="{ProductImage}"
           alt=""
           title="{ProductDescription}"
-          subtitle="">
+          subtitle=""
+          >
         </LightBoxItem>
        </LightBox>
       </detailBox>
@@ -18,6 +21,7 @@
      <Text id="_IDGenText1"
        textAlign="Center"
        text=""
-       class="sapUiSmallMarginTop"/>
+       class="sapUiSmallMarginTop"
+       />
 	</VBox>
 </core:FragmentDefinition>

@@ -206,7 +206,7 @@ sap.ui.define(
                         layout: "ColumnLayout",
                         columnsM: 2,
                         columnsL: 3,
-                        columnsXL: 4,
+                        columnsXL: 6,
                       });
 
                       oSimpleForm.addContent(
@@ -382,10 +382,13 @@ sap.ui.define(
 
           oCharBinding.requestContexts(0, 500).then(function (aContexts) {
             var oExistingContext = null;
-            
+
             aContexts.forEach(function (oCtx) {
               var sCtxCharName = oCtx.getProperty("Charname");
-              if (sCtxCharName && sCtxCharName.toUpperCase() === sCharName.toUpperCase()) {
+              if (
+                sCtxCharName &&
+                sCtxCharName.toUpperCase() === sCharName.toUpperCase()
+              ) {
                 oExistingContext = oCtx;
               }
             });
@@ -397,7 +400,7 @@ sap.ui.define(
             } else {
               oCharBinding.create({
                 Charname: sCharName,
-                Charvalue: sValue
+                Charvalue: sValue,
               });
             }
           });

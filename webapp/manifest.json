@@ -212,14 +212,14 @@
                                         }
                                     }
                                 },
-                                "_Season/@com.sap.vocabularies.UI.v1.LineItem": {
+                                "_Variant/@com.sap.vocabularies.UI.v1.LineItem": {
                                     "tableSettings": {
                                         "creationMode": {
                                             "name": "InlineCreationRows"
                                         }
                                     }
                                 },
-                                "_Variant/@com.sap.vocabularies.UI.v1.LineItem": {
+                                "_Season/@com.sap.vocabularies.UI.v1.LineItem": {
                                     "tableSettings": {
                                         "creationMode": {
                                             "name": "InlineCreationRows"
