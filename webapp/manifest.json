@@ -213,9 +213,13 @@
                                     }
                                 },
                                 "_Variant/@com.sap.vocabularies.UI.v1.LineItem": {
-                                    "tableSettings": {
-                                        "creationMode": {
-                                            "name": "InlineCreationRows"
+                                    "actions": {
+                                        "addvariant": {
+                                            "press": "com.zmanprodlist.ext.controller.AddVariant.AddVariant",
+                                            "visible": "{ui>/isEditable}",
+                                            "enabled": true,
+                                            "requiresSelection": false,
+                                            "text": "Add Variant"
                                         }
                                     }
                                 },

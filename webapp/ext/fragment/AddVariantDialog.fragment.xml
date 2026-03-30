@@ -1,0 +1,25 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <TableSelectDialog
+        id="variantSelectionDialog"
+        title="Select Variants"
+        noDataText="No variants found"
+        multiSelect="true"
+        rememberSelections="false"
+        contentWidth="25rem"
+        items="{v2Model>/AddVariantSet}"
+        confirm=".onAddVariantConfirm"
+        cancel=".onAddVariantCancel">
+        <ColumnListItem>
+            <cells>
+                <Text text="{v2Model>Articlesize}" />
+            </cells>
+        </ColumnListItem>
+        <columns>
+            <Column>
+                <header>
+                    <Text text="Article Size" />
+                </header>
+            </Column>
+        </columns>
+    </TableSelectDialog>
+</core:FragmentDefinition>
