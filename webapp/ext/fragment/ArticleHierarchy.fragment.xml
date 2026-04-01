@@ -1,0 +1,52 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:macros="sap.fe.macros">
+	<HBox wrap="Wrap" alignItems="Center" justifyContent="Center" class="hierarchyContainer" core:require="{ handler: 'com/zmanprodlist/ext/fragment/ArticleHierarchy'}">
+		<!-- L1 -->
+		<HBox visible="{= ${Hierarchy1Text} !== null &amp;&amp; ${Hierarchy1Text} !== '' }" class="hierarchyPill hierarchyPill-L1" alignItems="Center" justifyContent="Center">
+			<Text text="L1" class="hierarchyBadge hierarchyBadge-L1" />
+			<Text text="{Hierarchy1Text}" class="hierarchyText hierarchyText-L1" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy1Text} !== null &amp;&amp; ${Hierarchy1Text} !== '' &amp;&amp; ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' }" />
+
+		<!-- L2 -->
+		<HBox visible="{= ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' }" class="hierarchyPill hierarchyPill-L2" alignItems="Center" justifyContent="Center">
+			<Text text="L2" class="hierarchyBadge hierarchyBadge-L2" />
+			<Text text="{Hierarchy2Text}" class="hierarchyText hierarchyText-L2" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' &amp;&amp; ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' }" />
+
+		<!-- L3 -->
+		<HBox visible="{= ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' }" class="hierarchyPill hierarchyPill-L3" alignItems="Center" justifyContent="Center">
+			<Text text="L3" class="hierarchyBadge hierarchyBadge-L3" />
+			<Text text="{Hierarchy3Text}" class="hierarchyText hierarchyText-L3" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' &amp;&amp; ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' }" />
+
+		<!-- L4 -->
+		<HBox visible="{= ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' }" class="hierarchyPill hierarchyPill-L4" alignItems="Center" justifyContent="Center">
+			<Text text="L4" class="hierarchyBadge hierarchyBadge-L4" />
+			<Text text="{Hierarchy4Text}" class="hierarchyText hierarchyText-L4" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' &amp;&amp; ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' }" />
+
+		<!-- L5 -->
+		<HBox visible="{= ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' }" class="hierarchyPill hierarchyPill-L5" alignItems="Center" justifyContent="Center">
+			<Text text="L5" class="hierarchyBadge hierarchyBadge-L5" />
+			<Text text="{Hierarchy5Text}" class="hierarchyText hierarchyText-L5" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' &amp;&amp; ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' }" />
+
+		<!-- L6 -->
+		<HBox visible="{= ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' }" class="hierarchyPill hierarchyPill-L6" alignItems="Center" justifyContent="Center">
+			<Text text="L6" class="hierarchyBadge hierarchyBadge-L6" />
+			<Text text="{Hierarchy6Text}" class="hierarchyText hierarchyText-L6" wrapping="false" />
+		</HBox>
+		<core:Icon src="sap-icon://slim-arrow-right" class="hierarchySeparator" visible="{= ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' &amp;&amp; ${Hierarchy7Text} !== null &amp;&amp; ${Hierarchy7Text} !== '' }" />
+
+		<!-- L7 -->
+		<HBox visible="{= ${Hierarchy7Text} !== null &amp;&amp; ${Hierarchy7Text} !== '' }" class="hierarchyPill hierarchyPill-L7" alignItems="Center" justifyContent="Center">
+			<Text text="L7" class="hierarchyBadge hierarchyBadge-L7" />
+			<Text text="{Hierarchy7Text}" class="hierarchyText hierarchyText-L7" wrapping="false" />
+		</HBox>
+
+	</HBox>
+</core:FragmentDefinition>

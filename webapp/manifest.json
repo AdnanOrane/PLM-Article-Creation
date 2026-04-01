@@ -90,7 +90,12 @@
             }
         },
         "resources": {
-            "css": []
+            "css": [
+                {
+                    "uri": "css/style.css",
+                    "id": "CustomStyle"
+                }
+            ]
         },
         "routing": {
             "config": {},
@@ -181,6 +186,14 @@
                                                 "anchor": "Charvalues"
                                             },
                                             "title": "Attributes"
+                                        },
+                                        "ArticleHierarchy": {
+                                            "template": "com.zmanprodlist.ext.fragment.ArticleHierarchy",
+                                            "position": {
+                                                "placement": "After",
+                                                "anchor": "GeneralInfo"
+                                            },
+                                            "title": "Article Hierarchy"
                                         }
                                     }
                                 },

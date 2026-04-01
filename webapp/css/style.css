@@ -1,0 +1,47 @@
+/* Container for the article hierarchy */
+.hierarchyContainer {
+    padding: 1rem 0;
+    margin: 0;
+    gap: 0.5rem; /* Gap between items */
+    justify-content: center;
+}
+
+/* Individual Pill */
+.hierarchyPill {
+    border-radius: 4px;
+    padding: 4px 12px;
+    border: 1px solid rgba(171,52,48,0.3);
+    background-color: rgba(171,52,48,0.06);
+    min-width: 150px;
+    box-sizing: border-box;
+}
+
+/* Badge inside the pill */
+.hierarchyBadge {
+    border-radius: 2px;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(171,52,48,0.88);
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* Text inside the pill */
+.hierarchyText {
+    font-size: 0.875rem;
+    font-weight: bold;
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(15, 13, 13, 0.88);
+}
+
+/* Separator Icon */
+.hierarchySeparator {
+    color: #999999;
+    font-size: 0.875rem;
+    padding: 0 4px;
+}
