@@ -69,3 +69,17 @@
     display: inline-block !important;
     transform: rotate(90deg) !important;
 }
+
+/* Custom Header Field Styles - Product Image Fragment */
+.headerLabelStyle {
+    color: rgba(171,52,48,0.88) !important;
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 4px !important;
+}
+
+.headerValueStyle {
+    font-size: 0.9rem !important;
+    color: #333 !important;
+}

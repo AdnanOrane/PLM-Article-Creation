@@ -190,7 +190,7 @@
                                         "ArticleHierarchy": {
                                             "template": "com.zmanprodlist.ext.fragment.ArticleHierarchy",
                                             "position": {
-                                                "placement": "After",
+                                                "placement": "Before",
                                                 "anchor": "GeneralInfo"
                                             },
                                             "title": "Merchandise Hierarchy"

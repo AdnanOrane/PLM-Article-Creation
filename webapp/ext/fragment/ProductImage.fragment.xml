@@ -19,37 +19,49 @@
        </LightBox>
       </detailBox>
      </Avatar>
-     <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Product Description:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{ProductDescription}" />
-       </HBox>
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Product Group:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{ProductGroup}" />
-       </HBox>
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Status:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{Status}" />
-       </HBox>
-      </VBox>
-      <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Created By:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{CreatedByUser}" />
-       </HBox>
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Creation Date:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{CreationDate}" />
-       </HBox>
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Last Changed By:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{LastChangedByUser}" />
-       </HBox>
-       <HBox class="sapUiTinyMarginBottom" alignItems="Baseline">
-         <Label text="Last Change Date:" class="sapUiTinyMarginEnd" design="Bold"/>
-         <Text text="{LastChangeDate}" />
-       </HBox>
-     </VBox>
+	<!-- Column 1 -->
+	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="180px">
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="PRODUCT DESCRIPTION" class="headerLabelStyle"/>
+			<Text text="{ProductDescription}" class="headerValueStyle"/>
+		</VBox>
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="PRODUCT GROUP" class="headerLabelStyle"/>
+			<Text text="{ProductGroup}" class="headerValueStyle"/>
+		</VBox>
+	</VBox>
+	
+	<!-- Column 2 -->
+	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="160px">
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="CREATED BY" class="headerLabelStyle"/>
+			<Text text="{CreatedByUser}" class="headerValueStyle"/>
+		</VBox>
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="LAST CHANGED BY" class="headerLabelStyle"/>
+			<Text text="{LastChangedByUser}" class="headerValueStyle"/>
+		</VBox>
+	</VBox>
+
+	<!-- Column 3 -->
+	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="160px">
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="CREATION DATE" class="headerLabelStyle"/>
+			<Text text="{CreationDate}" class="headerValueStyle"/>
+		</VBox>
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="LAST CHANGE DATE" class="headerLabelStyle"/>
+			<Text text="{LastChangeDate}" class="headerValueStyle"/>
+		</VBox>
+	</VBox>
+
+	<!-- Column 4 -->
+	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="220px">
+		<VBox class="sapUiMediumMarginBottom">
+			<Label text="STATUS" class="headerLabelStyle"/>
+			<!-- Use generic text to gracefully handle standard status if present, screenshot shows a chip but text is fine -->
+			<Text text="{Status}" class="headerValueStyle"/>
+		</VBox>
+	</VBox>
 	</HBox>
 </core:FragmentDefinition>
