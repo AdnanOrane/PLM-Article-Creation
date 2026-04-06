@@ -195,6 +195,19 @@
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverApprove::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverReject::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
                                             ]
+                                        },
+                                        "ReopenGroup": {
+                                            "type": "Menu",
+                                            "text": "Reopen",
+                                            "position": {
+                                                "placement": "Before",
+                                                "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            },
+                                            "menu": [
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReCOMP::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReSADD::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReBOM::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            ]
                                         }
                                     }
                                 }
@@ -281,6 +294,7 @@
                                         "addvariant": {
                                             "press": "com.zmanprodlist.ext.controller.AddVariant.AddVariant",
                                             "visible": "{ui>/isEditable}",
+                                            "enabled": "{__CreateByAssociationControl/_Variant}",
                                             "requiresSelection": false,
                                             "text": "Add Variant"
                                         }
