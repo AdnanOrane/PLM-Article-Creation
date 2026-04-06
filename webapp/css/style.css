@@ -13,8 +13,8 @@
     border-radius: 12px !important;
     background-color: white !important;
     min-width: 150px !important;
-    max-width: 180px !important;
-    padding: 30px 16px 16px 16px !important;
+    max-width: 190px !important;
+    padding: 25px 12px 12px 12px !important;
     box-sizing: border-box !important;
     box-shadow: 0 4px 12px rgba(171,52,48,0.06) !important;
 }
@@ -25,9 +25,9 @@
     top: -24px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 48px !important;
+    width: 54px !important;
     height: 48px !important;
-    background-color: rgba(171,52,48,0.88) !important;
+    background-color: rgb(171, 52, 48) !important;
     border-radius: 12px !important;
     border: 4px solid white !important;
     box-sizing: border-box !important;
@@ -37,8 +37,9 @@
 }
 
 /* Icon inside the box */
-.hierarchyIcon {
-    font-size: 1.25rem !important;
+.hierarchyIcon,
+.hierarchyExternalIcon {
+    font-size: 1.5rem !important;
     color: white !important;
 }
 

@@ -3,7 +3,7 @@
 		<!-- L1 -->
 		<VBox visible="{= ${Hierarchy1Text} !== null &amp;&amp; ${Hierarchy1Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://retail-store" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-copyright hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 1" class="hierarchyLevelText" />
 			<Text text="{Hierarchy1Text}" class="hierarchyMainText" wrapping="true" />
@@ -13,7 +13,7 @@
 		<!-- L2 -->
 		<VBox visible="{= ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://palette" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-building hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 2" class="hierarchyLevelText" />
 			<Text text="{Hierarchy2Text}" class="hierarchyMainText" wrapping="true" />
@@ -23,7 +23,7 @@
 		<!-- L3 -->
 		<VBox visible="{= ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://group" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-venus-mars hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 3" class="hierarchyLevelText" />
 			<Text text="{Hierarchy3Text}" class="hierarchyMainText" wrapping="true" />
@@ -33,7 +33,7 @@
 		<!-- L4 -->
 		<VBox visible="{= ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://product" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-sitemap hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 4" class="hierarchyLevelText" />
 			<Text text="{Hierarchy4Text}" class="hierarchyMainText" wrapping="true" />
@@ -43,7 +43,7 @@
 		<!-- L5 -->
 		<VBox visible="{= ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://tag" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-layer-group hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 5" class="hierarchyLevelText" />
 			<Text text="{Hierarchy5Text}" class="hierarchyMainText" wrapping="true" />
@@ -53,7 +53,7 @@
 		<!-- L6 -->
 		<VBox visible="{= ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://customize" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-shapes hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 6" class="hierarchyLevelText" />
 			<Text text="{Hierarchy6Text}" class="hierarchyMainText" wrapping="true" />
@@ -63,7 +63,7 @@
 		<!-- L7 -->
 		<VBox visible="{= ${Hierarchy7Text} !== null &amp;&amp; ${Hierarchy7Text} !== '' }" class="hierarchyCard" alignItems="Center">
 			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
-				<core:Icon src="sap-icon://dimension" class="hierarchyIcon" />
+				<core:HTML content="&lt;i class='fa-solid fa-tags hierarchyExternalIcon'&gt;&lt;/i&gt;" />
 			</VBox>
 			<Text text="Hierarchy 7" class="hierarchyLevelText" />
 			<Text text="{Hierarchy7Text}" class="hierarchyMainText" wrapping="true" />

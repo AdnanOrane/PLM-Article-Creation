@@ -94,6 +94,10 @@
                 {
                     "uri": "css/style.css",
                     "id": "CustomStyle"
+                },
+                {
+                    "uri": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
+                    "id": "FontAwesome"
                 }
             ]
         },
@@ -145,6 +149,53 @@
                                 "zc_cdsv_man_product": {
                                     "detail": {
                                         "route": "zc_cdsv_man_productObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "actions": {
+                                        "ReferenceStyleGroup": {
+                                            "type": "Menu",
+                                            "text": "Reference Style",
+                                            "position": {
+                                                "placement": "Before",
+                                                "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            },
+                                            "menu": [
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setCopyStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setSMUStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnlineStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            ]
+                                        },
+                                        "HandoverInitiationGroup": {
+                                            "type": "Menu",
+                                            "text": "Handover Initiation",
+                                            "position": {
+                                                "placement": "Before",
+                                                "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            },
+                                            "menu": [
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.CompleteInitiation::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.PartialInitiation::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            ]
+                                        },
+                                        "HandoverApprovalGroup": {
+                                            "type": "Menu",
+                                            "text": "Handover Approval",
+                                            "position": {
+                                                "placement": "Before",
+                                                "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            },
+                                            "menu": [
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.PartialApprove::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.PartialReject::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverApprove::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverReject::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            ]
+                                        }
                                     }
                                 }
                             }
@@ -230,7 +281,6 @@
                                         "addvariant": {
                                             "press": "com.zmanprodlist.ext.controller.AddVariant.AddVariant",
                                             "visible": "{ui>/isEditable}",
-                                            "enabled": true,
                                             "requiresSelection": false,
                                             "text": "Add Variant"
                                         }
