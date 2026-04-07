@@ -238,6 +238,9 @@ sap.ui.define(
                         var oInput = new sap.m.Input({
                           value: field.charvalues,
                           showValueHelp: true,
+                          autocomplete: true,
+                          showSuggestion: true,
+                          filterSuggests: false,
                           width: "10rem",
                           name: field.charname,
                           editable: aReadOnlyChars.includes(field.charname)
@@ -245,7 +248,9 @@ sap.ui.define(
                             : "{viewState>/showForm}",
                           valueHelpRequest: that.onValueHelpRequest.bind(that),
                           change: that.onCharacteristicChange.bind(that),
+                          suggest: that.onCharacteristicSuggest.bind(that),
                         });
+                        oInput.data("label", field.charecteristics);
                         // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
                         // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
                         // oLabel.setLayoutData(new sap.ui.layout.GridData({
@@ -301,7 +306,15 @@ sap.ui.define(
           //         console.log(aInputs[i]);
           //     }
           // }
-          var strLabel = oInput.oParent.mAggregations.label.getText();
+          var strLabel = oInput.data("label");
+          if (
+            !strLabel &&
+            oInput.oParent &&
+            oInput.oParent.mAggregations &&
+            oInput.oParent.mAggregations.label
+          ) {
+            strLabel = oInput.oParent.mAggregations.label.getText();
+          }
           //strLabel = strLabel.replace(/\s+/g, "");
           var oModel = new sap.ui.model.odata.v2.ODataModel({
             serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
@@ -365,6 +378,80 @@ sap.ui.define(
               MessageBox.error("Failed to load value help data.");
             },
           });
+        },
+
+        onCharacteristicSuggest: function (oEvent) {
+          var oInput = oEvent.getSource();
+          var sTerm = oEvent.getParameter("suggestValue");
+
+          var strLabel = oInput.data("label");
+          if (
+            !strLabel &&
+            oInput.oParent &&
+            oInput.oParent.mAggregations &&
+            oInput.oParent.mAggregations.label
+          ) {
+            strLabel = oInput.oParent.mAggregations.label.getText();
+          }
+
+          if (
+            !oInput.getModel("suggestionModel") &&
+            !oInput.data("fetchingSuggestions")
+          ) {
+            oInput.data("fetchingSuggestions", true);
+            var oModel = new sap.ui.model.odata.v2.ODataModel({
+              serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
+            });
+
+            oModel.read("/valuesInputSet", {
+              filters: [
+                new sap.ui.model.Filter(
+                  "key",
+                  sap.ui.model.FilterOperator.EQ,
+                  strLabel,
+                ),
+              ],
+              success: function (oData) {
+                var oVHModel = new sap.ui.model.json.JSONModel({
+                  ValueList: oData.results,
+                });
+                oVHModel.setSizeLimit(1000);
+                oInput.setModel(oVHModel, "suggestionModel");
+
+                oInput.bindAggregation("suggestionItems", {
+                  path: "suggestionModel>/ValueList",
+                  template: new sap.ui.core.Item({
+                    text: "{suggestionModel>desc}",
+                    key: "{suggestionModel>desc}",
+                  }),
+                });
+
+                var oBinding = oInput.getBinding("suggestionItems");
+                if (oBinding) {
+                  var sCurrentValue = oInput.getValue();
+                  var oFilter = new sap.ui.model.Filter(
+                    "desc",
+                    sap.ui.model.FilterOperator.Contains,
+                    sCurrentValue,
+                  );
+                  oBinding.filter([oFilter]);
+                }
+              },
+              error: function () {
+                oInput.data("fetchingSuggestions", false);
+              },
+            });
+          } else if (oInput.getModel("suggestionModel")) {
+            var oBinding = oInput.getBinding("suggestionItems");
+            if (oBinding) {
+              var oFilter = new sap.ui.model.Filter(
+                "desc",
+                sap.ui.model.FilterOperator.Contains,
+                sTerm,
+              );
+              oBinding.filter([oFilter]);
+            }
+          }
         },
 
         onCharacteristicChange: function (oEvent) {

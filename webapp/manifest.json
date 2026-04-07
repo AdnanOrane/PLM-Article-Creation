@@ -206,7 +206,8 @@
                                             "menu": [
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReCOMP::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReSADD::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
-                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReBOM::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReBOM::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.RePIR::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
                                             ]
                                         }
                                     }
