@@ -20,6 +20,13 @@ sap.ui.define(
 
           routing: {
             onAfterBinding: function (oContext) {
+              // Execute Completeness Profile early in a separate controller to separate concerns
+              var oCurrentView = this.getView() || this.base.getView();
+              var oCurrentContext = oCurrentView.getBindingContext() || oContext;
+              sap.ui.require(["com/zmanprodlist/ext/controller/ObjectPageExt.controller"], function (ObjExt) {
+                  ObjExt._calculateCompleteness(oCurrentContext, oCurrentView);
+              });
+
               // Rename attachment create button to "Add" for better clarity in the UI
               var oAttachCreate = this.base
                 .getView()

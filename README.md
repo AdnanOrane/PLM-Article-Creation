@@ -91,3 +91,11 @@ npm run build
   - `localService/`: Mock data and metadata.
   - `i18n/`: Internationalization files.
 - `ui5.yaml`: UI5 tooling configuration.
+
+## Documentation
+
+Detailed technical documentation for custom features lives in the [`docs/`](./docs/) folder.
+
+| Document | Description |
+|---|---|
+| [Profile Completeness Widget](./docs/profile-completeness-widget.md) | How the Style Readiness chart works — all sections, calculation strategies, data sources, CSS classes, and how to add new sections |
