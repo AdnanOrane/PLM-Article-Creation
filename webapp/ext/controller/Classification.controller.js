@@ -113,18 +113,22 @@ sap.ui.define(
                 oCharListBinding
                   .requestContexts(0, 1)
                   .then(function (aCtx) {
-                    var bSectionUpdatable = true;
                     if (aCtx && aCtx.length > 0) {
-                      var oEntityControl =
-                        aCtx[0].getProperty("__EntityControl");
-                      if (
-                        oEntityControl &&
-                        oEntityControl.Updatable === false
-                      ) {
-                        bSectionUpdatable = false;
-                      }
+                      aCtx[0]
+                        .requestProperty("__EntityControl/Updatable")
+                        .then(function (bUpdatable) {
+                          var bSectionUpdatable = true;
+                          if (bUpdatable === false) {
+                            bSectionUpdatable = false;
+                          }
+                          _triggerClassificationRead(bSectionUpdatable);
+                        })
+                        .catch(function () {
+                          _triggerClassificationRead(true);
+                        });
+                    } else {
+                      _triggerClassificationRead(true);
                     }
-                    _triggerClassificationRead(bSectionUpdatable);
                   })
                   .catch(function () {
                     _triggerClassificationRead(true);
