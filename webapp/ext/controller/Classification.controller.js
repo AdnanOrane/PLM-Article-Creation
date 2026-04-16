@@ -22,10 +22,14 @@ sap.ui.define(
             onAfterBinding: function (oContext) {
               // Execute Completeness Profile early in a separate controller to separate concerns
               var oCurrentView = this.getView() || this.base.getView();
-              var oCurrentContext = oCurrentView.getBindingContext() || oContext;
-              sap.ui.require(["com/zmanprodlist/ext/controller/ObjectPageExt.controller"], function (ObjExt) {
+              var oCurrentContext =
+                oCurrentView.getBindingContext() || oContext;
+              sap.ui.require(
+                ["com/zmanprodlist/ext/controller/ObjectPageExt.controller"],
+                function (ObjExt) {
                   ObjExt._calculateCompleteness(oCurrentContext, oCurrentView);
-              });
+                },
+              );
 
               // Rename attachment create button to "Add" for better clarity in the UI
               var oAttachCreate = this.base
@@ -93,22 +97,64 @@ sap.ui.define(
 
               // Fetch ReadOnly Attributes first
               var aReadOnlyChars = [];
+              var aReadOnlyProps = [];
+
+              function _checkInstanceFeatureAndRead() {
+                var sPathCh = sPath + "/_charecteristics";
+                var oCharListBinding = oModelPG.bindList(
+                  sPathCh,
+                  null,
+                  null,
+                  null,
+                  {
+                    $select: "__EntityControl",
+                  },
+                );
+                oCharListBinding
+                  .requestContexts(0, 1)
+                  .then(function (aCtx) {
+                    var bSectionUpdatable = true;
+                    if (aCtx && aCtx.length > 0) {
+                      var oEntityControl =
+                        aCtx[0].getProperty("__EntityControl");
+                      if (
+                        oEntityControl &&
+                        oEntityControl.Updatable === false
+                      ) {
+                        bSectionUpdatable = false;
+                      }
+                    }
+                    _triggerClassificationRead(bSectionUpdatable);
+                  })
+                  .catch(function () {
+                    _triggerClassificationRead(true);
+                  });
+              }
+
               oModel.read("/ReadOnlyCharSetSet", {
                 success: function (oDataRO) {
                   if (oDataRO && oDataRO.results) {
                     aReadOnlyChars = oDataRO.results.map(function (item) {
-                      return item.Charname;
+                      return item.Charname ? item.Charname.toUpperCase() : "";
+                    });
+                    oDataRO.results.forEach(function (item) {
+                      if (item.Charname) {
+                        aReadOnlyProps.push({
+                          charname: item.Charname.toUpperCase(),
+                          type: item.Type ? item.Type.toUpperCase() : "",
+                        });
+                      }
                     });
                   }
-                  _triggerClassificationRead();
+                  _checkInstanceFeatureAndRead();
                 },
                 error: function () {
                   console.error("Failed to fetch ReadOnlyCharSet");
-                  _triggerClassificationRead();
+                  _checkInstanceFeatureAndRead();
                 },
               });
 
-              function _triggerClassificationRead() {
+              function _triggerClassificationRead(bSectionUpdatable) {
                 var aFilters = [
                   new sap.ui.model.Filter(
                     "Productuuid",
@@ -208,6 +254,13 @@ sap.ui.define(
                         .setProperty("/showForm", false);
                     }
 
+                    if (bSectionUpdatable === false) {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    }
+
                     Object.keys(oCharGroup).forEach((item) => {
                       var oSimpleForm = new sap.ui.layout.form.SimpleForm({
                         layout: "ColumnLayout",
@@ -226,21 +279,32 @@ sap.ui.define(
 
                         var bRequired = false;
 
-                        if (field.charecteristics) {
-                          var sChar = field.charecteristics.toLowerCase();
-                          if (
-                            sChar === "shellfabric2" ||
-                            sChar === "shellfabric3" ||
-                            sChar === "shell fabric 1"
-                          ) {
-                            bRequired = true;
-                          }
+                        var sUpperCharName = field.charname
+                          ? field.charname.toUpperCase()
+                          : "";
+                        var oMatchedProp = aReadOnlyProps.find(function (p) {
+                          return p.charname === sUpperCharName;
+                        });
+                        var sType = oMatchedProp ? oMatchedProp.type : "";
+
+                        if (sType === "M") {
+                          bRequired = true;
                         }
 
                         var oLabel = new sap.m.Label({
                           text: field.charecteristics,
                           required: bRequired,
                         });
+
+                        var bIsEditable = "{viewState>/showForm}";
+                        if (sType === "D") {
+                          bIsEditable = false;
+                        } else if (
+                          aReadOnlyChars.includes(sUpperCharName) &&
+                          sType !== "M"
+                        ) {
+                          bIsEditable = false;
+                        }
 
                         var oInput = new sap.m.Input({
                           value: field.charvalues,
@@ -250,9 +314,7 @@ sap.ui.define(
                           filterSuggests: false,
                           width: "10rem",
                           name: field.charname,
-                          editable: aReadOnlyChars.includes(field.charname)
-                            ? false
-                            : "{viewState>/showForm}",
+                          editable: bIsEditable,
                           valueHelpRequest: that.onValueHelpRequest.bind(that),
                           change: that.onCharacteristicChange.bind(that),
                           suggest: that.onCharacteristicSuggest.bind(that),
