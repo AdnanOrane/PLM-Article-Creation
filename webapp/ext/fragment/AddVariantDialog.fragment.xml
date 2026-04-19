@@ -6,14 +6,8 @@
         multiSelect="true"
         rememberSelections="false"
         contentWidth="25rem"
-        items="{v2Model>/AddVariantSet}"
         confirm=".onAddVariantConfirm"
         cancel=".onAddVariantCancel">
-        <ColumnListItem>
-            <cells>
-                <Text text="{v2Model>Articlesize}" />
-            </cells>
-        </ColumnListItem>
         <columns>
             <Column>
                 <header>

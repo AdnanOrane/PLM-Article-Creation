@@ -1,4 +1,4 @@
-sap.ui.define(["sap/m/MessageToast"], function (MessageToast) {
+sap.ui.define(["sap/m/MessageToast", "sap/ui/model/Filter", "sap/ui/model/FilterOperator"], function (MessageToast, Filter, FilterOperator) {
   "use strict";
 
   var oAddVariantController = {
@@ -12,29 +12,76 @@ sap.ui.define(["sap/m/MessageToast"], function (MessageToast) {
      * @param aSelectedContexts the selected contexts of the table rows.
      */
     AddVariant: function (oContext, aSelectedContexts) {
-      if (!oAddVariantController._oAddVariantDialog) {
-        sap.ui.core.Fragment.load({
-          id: "fragAddVariant",
-          name: "com.zmanprodlist.ext.fragment.AddVariantDialog",
-          controller: oAddVariantController,
-        }).then(
-          function (oDialog) {
-            oAddVariantController._oAddVariantDialog = oDialog;
+      oAddVariantController._oProductContext = oContext;
 
-            // Instantiate and bind the V2 OData service model
-            var oV2Model = new sap.ui.model.odata.v2.ODataModel(
-              "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
-            );
-            oAddVariantController._oAddVariantDialog.setModel(oV2Model, "v2Model");
+      var oModel = oContext.getModel();
+      var oMetaModel = oModel.getMetaModel();
+      var sMetaPath = "/ZC_CDSV_VARIANT/articlesize";
 
-            oAddVariantController._oProductContext = oContext;
-            oAddVariantController._oAddVariantDialog.open();
+      oMetaModel.requestValueListInfo(sMetaPath, true).then(function (mValueListInfo) {
+          var oValueList = mValueListInfo[""];
+          if (!oValueList) {
+              sap.m.MessageToast.show("No F4 Value Help found for Article Size in backend metadata.");
+              return;
           }
-        );
-      } else {
-        oAddVariantController._oProductContext = oContext;
-        oAddVariantController._oAddVariantDialog.open();
-      }
+
+          var sTargetCollectionPath = "/" + oValueList.CollectionPath;
+          var sKeyProperty = oValueList.Parameters[0].ValueListProperty; 
+          oAddVariantController._sValueListKeyProperty = sKeyProperty; // Save for confirm handler
+
+          if (!oAddVariantController._oAddVariantDialog) {
+              sap.ui.core.Fragment.load({
+                  id: "fragAddVariant",
+                  name: "com.zmanprodlist.ext.fragment.AddVariantDialog",
+                  controller: oAddVariantController,
+              }).then(
+                  function (oDialog) {
+                      oAddVariantController._oAddVariantDialog = oDialog;
+
+                      // Dynamically bind to the V4 F4 Value Help model!
+                      oAddVariantController._oAddVariantDialog.setModel(oValueList.$model);
+
+                      // Array to hold any dynamic filters from ValueHelp bindings
+                      var aFilters = [];
+                      if (oValueList.Parameters) {
+                          oValueList.Parameters.forEach(function (oParam) {
+                              // We only care about mapped IN parameters (which the backend provides via additionalBinding #FILTER_AND_RESULT or #FILTER)
+                              if (oParam.$Type && (oParam.$Type.indexOf("ValueListParameterIn") > -1)) {
+                                  var sLocalPath = oParam.LocalDataProperty && oParam.LocalDataProperty.$PropertyPath;
+                                  var sValueListProp = oParam.ValueListProperty;
+                                  if (sLocalPath && sValueListProp) {
+                                      // Get the value from the main entity context
+                                      var sPropValue = oAddVariantController._oProductContext.getProperty(sLocalPath);
+                                      if (sPropValue) {
+                                          aFilters.push(new sap.ui.model.Filter(sValueListProp, sap.ui.model.FilterOperator.EQ, sPropValue));
+                                          console.log("Applying dynamic F4 filter: " + sValueListProp + " = " + sPropValue);
+                                      }
+                                  }
+                              }
+                          });
+                      }
+
+                      // Dynamically create rows for the multi-select table
+                      oAddVariantController._oAddVariantDialog.bindAggregation("items", {
+                          path: sTargetCollectionPath,
+                          filters: aFilters,
+                          template: new sap.m.ColumnListItem({
+                              cells: [
+                                  new sap.m.Text({ text: "{" + sKeyProperty + "}" })
+                              ]
+                          })
+                      });
+
+                      oAddVariantController._oAddVariantDialog.open();
+                  }
+              );
+          } else {
+              oAddVariantController._oAddVariantDialog.open();
+          }
+      }).catch(function(oErr) {
+          console.error("Error fetching Value List Info:", oErr);
+          sap.m.MessageToast.show("Error resolving Value Help data.");
+      });
     },
 
     onAddVariantConfirm: function (oEvent) {
@@ -77,7 +124,7 @@ sap.ui.define(["sap/m/MessageToast"], function (MessageToast) {
       }
 
       aSelectedContexts.forEach(function (oContext) {
-        var sArticleSize = oContext.getProperty("Articlesize") || oContext.getProperty("ArticleSize");
+        var sArticleSize = oContext.getProperty("Articlesize") || oContext.getProperty("ArticleSize") || oContext.getProperty(that._sValueListKeyProperty);
         console.log("Preparing to push empty variant draft, then PATCHing with size:", sArticleSize);
 
         // CREATE AN EMPTY DRAFT FIRST - Bypasses backend readonly/key payload restrictions during POST
