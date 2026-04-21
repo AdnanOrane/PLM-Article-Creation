@@ -10,6 +10,20 @@ sap.ui.define(
                   console.error("Missing oContext or oView!");
                   return;
               }
+              
+              // Dynamically attach press event to the Avatar since XML bindings can be restrictive
+              var aControls = Object.values(sap.ui.core.Element.registry.all());
+              for(var i=0; i<aControls.length; i++) {
+                 if (aControls[i].getMetadata().getName() === "sap.m.Avatar" && aControls[i].getId().indexOf("_IDGenAvatar") !== -1) {
+                     var oAvatar = aControls[i];
+                     if (!oAvatar._bZoomAttached) {
+                         oAvatar.setActive(true);
+                         oAvatar.attachPress(this.onImageZoomPress.bind(this));
+                         oAvatar._bZoomAttached = true;
+                     }
+                     break;
+                 }
+              }
   
               var oCompletenessModel = oView.getModel("CompletenessModel");
               if (!oCompletenessModel) {
@@ -208,6 +222,119 @@ sap.ui.define(
                       console.error("Error calculating completeness:", e);
                   });
               });
+          },
+
+          onImageZoomPress: function(oEvent) {
+             var oAvatar = oEvent.getSource();
+             var that = this;
+             
+             if (!this._oZoomDialogPromise) {
+                 this._oZoomDialogPromise = sap.ui.core.Fragment.load({
+                     name: "com.zmanprodlist.ext.fragment.ZoomDialog",
+                     controller: this
+                 }).then(function(oDialog) {
+                     oAvatar.addDependent(oDialog);
+                     return oDialog;
+                 });
+             }
+             
+             this._oZoomDialogPromise.then(function(oDialog) {
+                 if (oAvatar.getBindingContext()) {
+                     oDialog.setBindingContext(oAvatar.getBindingContext());
+                 }
+                 oDialog.open();
+                 
+                 // Reset zoom slider to 200 (2x default)
+                 var oSlider = sap.ui.getCore().byId("imageZoomSlider") || sap.ui.core.Element.getElementById("imageZoomSlider");
+                 if (oSlider) { oSlider.setValue(200); }
+                 
+                 // Use UI5 onAfterRendering to securely attach native DOM events exactly when the DOM is 100% available
+                 var oLeftImage = sap.ui.getCore().byId("leftOriginalImage") || sap.ui.core.Element.getElementById("leftOriginalImage");
+                 
+                 if (oLeftImage && !oLeftImage._bHoverEventsAttached) {
+                     oLeftImage.addEventDelegate({
+                         onAfterRendering: function() {
+                             var leftDom = oLeftImage.getDomRef();
+                             if (!leftDom) return;
+                             
+                             // Immediately hide zoom pane upon render without 200ms glitch delays
+                             var oRightImg = sap.ui.getCore().byId("rightZoomedImage") || sap.ui.core.Element.getElementById("rightZoomedImage");
+                             var initRightDom = oRightImg ? oRightImg.getDomRef() : null;
+                             if (initRightDom) { initRightDom.style.opacity = "0"; }
+                             
+                             // Attach native bypass listeners directly to the fresh DOM Node
+                             leftDom.addEventListener("mouseover", function() {
+                                 var oR = sap.ui.getCore().byId("rightZoomedImage") || sap.ui.core.Element.getElementById("rightZoomedImage");
+                                 var rDom = oR ? oR.getDomRef() : null;
+                                 if (rDom) { rDom.style.opacity = "1"; }
+                             });
+                             leftDom.addEventListener("mouseout", function() {
+                                 var oR = sap.ui.getCore().byId("rightZoomedImage") || sap.ui.core.Element.getElementById("rightZoomedImage");
+                                 var rDom = oR ? oR.getDomRef() : null;
+                                 if (rDom) { rDom.style.opacity = "0"; }
+                             });
+                             leftDom.addEventListener("mousemove", function(e) {
+                                 that._handleAmazonZoom(e);
+                             });
+                         }
+                     }, oLeftImage);
+                     oLeftImage._bHoverEventsAttached = true;
+                 }
+             });
+          },
+
+          _handleAmazonZoom: function(oEvent) {
+             var oSlider = sap.ui.getCore().byId("imageZoomSlider") || sap.ui.core.Element.getElementById("imageZoomSlider");
+             var multiplier = oSlider ? oSlider.getValue() / 100 : 2; // e.g. 200% -> 2
+             
+             var oLeftImage = sap.ui.getCore().byId("leftOriginalImage") || sap.ui.core.Element.getElementById("leftOriginalImage");
+             var oRightImage = sap.ui.getCore().byId("rightZoomedImage") || sap.ui.core.Element.getElementById("rightZoomedImage");
+             
+             if (!oLeftImage || !oRightImage) return;
+             
+             var domRef = oLeftImage.getDomRef();
+             if (!domRef) return;
+             
+             var rect = domRef.getBoundingClientRect();
+             var clientX = oEvent.clientX !== undefined ? oEvent.clientX : (oEvent.touches && oEvent.touches.length > 0 ? oEvent.touches[0].clientX : null);
+             var clientY = oEvent.clientY !== undefined ? oEvent.clientY : (oEvent.touches && oEvent.touches.length > 0 ? oEvent.touches[0].clientY : null);
+             
+             if (clientX === null || clientY === null) return;
+             
+             var xPos = clientX - rect.left;
+             var yPos = clientY - rect.top;
+             
+             var xPercent = (xPos / rect.width) * 100;
+             var yPercent = (yPos / rect.height) * 100;
+             
+             xPercent = Math.max(0, Math.min(100, xPercent));
+             yPercent = Math.max(0, Math.min(100, yPercent));
+             
+             var oRightDom = oRightImage.getDomRef();
+             if (oRightDom) {
+                 var spanEle = oRightDom.querySelector(".sapMImg") || oRightDom;
+                 spanEle.style.backgroundPosition = xPercent + "% " + yPercent + "%";
+                 spanEle.style.backgroundSize = (multiplier * 100) + "% " + (multiplier * 100) + "%";
+             }
+          },
+
+          onZoomChange: function(oEvent) {
+             var iZoomValue = oEvent.getParameter("value"); 
+             var oRightImage = sap.ui.getCore().byId("rightZoomedImage") || sap.ui.core.Element.getElementById("rightZoomedImage");
+             if (oRightImage) {
+                 var oRightDom = oRightImage.getDomRef();
+                 if (oRightDom) {
+                     var spanEle = oRightDom.querySelector(".sapMImg") || oRightDom;
+                     spanEle.style.backgroundSize = iZoomValue + "% " + iZoomValue + "%";
+                 }
+             }
+          },
+
+          onCloseZoomDialog: function(oEvent) {
+             var oDialog = sap.ui.getCore().byId("imageZoomDialog") || sap.ui.core.Element.getElementById("imageZoomDialog");
+             if (oDialog) {
+                 oDialog.close();
+             }
           }
       };
     }

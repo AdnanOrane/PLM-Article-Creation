@@ -100,6 +100,25 @@ sap.ui.define(
               var aReadOnlyProps = [];
 
               function _checkInstanceFeatureAndRead() {
+                // Safeguard: Check if object is Active Entity (Display Mode)
+                var bIsActiveEntity = oContextPG.getProperty("IsActiveEntity");
+                var bIsEditable = true;
+
+                if (bIsActiveEntity === true) {
+                  bIsEditable = false;
+                }
+
+                // Fallback UI model check (Fiori Elements v4)
+                var oUIModel = oViewPG.getModel("ui");
+                if (oUIModel && oUIModel.getProperty("/isEditable") === false) {
+                  bIsEditable = false;
+                }
+
+                if (!bIsEditable) {
+                  _triggerClassificationRead(false);
+                  return;
+                }
+
                 var sPathCh = sPath + "/_charecteristics";
                 var oCharListBinding = oModelPG.bindList(
                   sPathCh,

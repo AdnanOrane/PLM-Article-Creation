@@ -114,4 +114,11 @@ _syncAutoPopulatedValues: function (aClassificationResults, oContext, oModel) {
     });
 }
 ```
-**Protection Boundaries:** By evaluating `bSectionUpdatable` prior to executing the function, we guarantee `aCtx[0].requestProperty("__EntityControl/Updatable")` successfully governs the injection, fully protecting Display mode attributes from crashing against read-only backend parameters mapping.
+**Protection Boundaries:** 
+Previously, evaluating `aCtx[0].requestProperty("__EntityControl/Updatable")` was insufficient because opening an object in Display mode with *zero* characteristics produced an empty array `aCtx`. This defaulted the updatable flag to `true`, causing an illegal OData POST against an Active Entity and resulting in a system dump. 
+
+To definitively secure this layout, we now verify the **Active Entity (Display Mode)** status before initiating any context requests:
+1. `oContextPG.getProperty("IsActiveEntity")`: For Fiori Elements V4 Drafts, a `true` value strictly identifies the active entity.
+2. `oUIModel.getProperty("/isEditable")`: Fallback UI model layout check.
+
+If either confirm Display Mode, we force `_triggerClassificationRead(false)` instantly, successfully preventing the Draft Injection framework from colliding against read-only modes.

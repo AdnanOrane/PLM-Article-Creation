@@ -1,120 +1,227 @@
-<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:macros="sap.fe.macros" xmlns:suite="sap.suite.ui.microchart" xmlns:mvc="sap.ui.core.mvc">
-	<HBox alignItems="Start" wrap="Wrap" width="100%">
-	<HBox wrap="Wrap" class="sapUiLargeMarginEnd">
-	  <Avatar id="_IDGenAvatar"
-       src="{ProductImage}"
-       displaySize="XL"
-       displayShape="Square"
-       imageFitType="Contain"
-       class="sapUiMediumMarginEnd"
-       >
-      <detailBox>
-       <LightBox id="_IDGenLightBox">
-        <LightBoxItem id="_IDGenLightBoxItem"
-           imageSrc="{ProductImage}"
-          alt=""
-          title="{ProductDescription}"
-          subtitle=""
-          >
-        </LightBoxItem>
-       </LightBox>
-      </detailBox>
-     </Avatar>
-	<!-- Column 1 -->
-	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column">
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="PRODUCT DESCRIPTION" class="headerLabelStyle"/>
-			<Text text="{ProductDescription}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="PRODUCT GROUP" class="headerLabelStyle"/>
-			<Text text="{ProductGroup}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="BRAND" class="headerLabelStyle"/>
-			<Text text="{brand}" class="headerValueStyle"/>
-		</VBox>
-	</VBox>
-	
-	<!-- Column 2 -->
-	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column" >
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="CREATED BY" class="headerLabelStyle"/>
-			<Text text="{CreatedByUser}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="LAST CHANGED BY" class="headerLabelStyle"/>
-			<Text text="{LastChangedByUser}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="LAST CHANGE DATE" class="headerLabelStyle"/>
-			<Text text="{LastChangeDate}" class="headerValueStyle"/>
-		</VBox>
-	</VBox>
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:macros="sap.fe.macros"
+    xmlns:suite="sap.suite.ui.microchart"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <HBox
+        alignItems="Start"
+        wrap="Wrap"
+        width="100%"
+    >
+        <HBox
+            wrap="Wrap"
+            class="sapUiLargeMarginEnd"
+        >
+            <Avatar
+                id="_IDGenAvatar"
+                src="{ProductImage}"
+                displaySize="XL"
+                displayShape="Square"
+                imageFitType="Contain"
+                class="sapUiMediumMarginEnd"
+                active="true"
+            >
+            </Avatar>
+            <!-- Column 1 -->
+            <VBox
+                class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column"
+            >
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="PRODUCT DESCRIPTION"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{ProductDescription}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="PRODUCT GROUP"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{ProductGroup}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="BRAND"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{brand}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+            </VBox>
 
-	<!-- Column 3 -->
-	<VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column" >
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="CREATION DATE" class="headerLabelStyle"/>
-			<Text text="{CreationDate}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="STATUS" class="headerLabelStyle"/>
-			<Text text="{Status}" class="headerValueStyle"/>
-		</VBox>
-		<VBox class="sapUiMediumMarginBottom">
-			<Label text="OLD CATEGORY" class="headerLabelStyle"/>
-			<Text text="{OldCategory}" class="headerValueStyle"/>
-		</VBox>
-	</VBox>
+            <!-- Column 2 -->
+            <VBox
+                class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column"
+            >
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="CREATED BY"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{CreatedByUser}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="LAST CHANGED BY"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{LastChangedByUser}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="LAST CHANGE DATE"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{LastChangeDate}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+            </VBox>
 
-	<!-- Column 4 -->
-	<!-- <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="160px">
+            <!-- Column 3 -->
+            <VBox
+                class="sapUiLargeMarginEnd sapUiSmallMarginBottom text_column"
+            >
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="CREATION DATE"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{CreationDate}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="STATUS"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{Status}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+                <VBox class="sapUiMediumMarginBottom">
+                    <Label
+                        text="OLD CATEGORY"
+                        class="headerLabelStyle"
+                    />
+                    <Text
+                        text="{OldCategory}"
+                        class="headerValueStyle"
+                    />
+                </VBox>
+            </VBox>
+
+            <!-- Column 4 -->
+            <!-- <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom" width="160px">
 		
 	</VBox> -->
 
+            <!-- Profile Completeness Widget -->
+            <VBox class="profileCompletenessBox">
+                <layoutData>
+                    <FlexItemData
+                        growFactor="1"
+                        minWidth="400px"
+                    />
+                </layoutData>
+                <!-- Top Side Overall -->
+                <HBox
+                    alignItems="Center"
+                    class="sapUiSmallMarginBottom"
+                    width="100%"
+                >
+                    <suite:RadialMicroChart
+                        size="S"
+                        percentage="{CompletenessModel>/overallProgress}"
+                        valueColor="{CompletenessModel>/overallState}"
+                        class="sapUiTinyMarginEnd profileCompRadialBox"
+                    />
+                    <VBox class="sapUiSmallMarginBegin">
+                        <Text
+                            text="Style Readiness"
+                            class="profileCompTitle"
+                        />
+                        <Text
+                            text="{CompletenessModel>/overallProgress}% complete"
+                            class="profileCompSubtitle"
+                        />
+                        <Text
+                            text="{CompletenessModel>/sectionsNeedAttention} sections need attention"
+                            class="profileCompSubtitle sapUiTinyMarginBottom"
+                        />
+                    </VBox>
+                </HBox>
 
-	<!-- Profile Completeness Widget -->
-	<VBox class="profileCompletenessBox">
-		<layoutData>
-			<FlexItemData growFactor="1" minWidth="400px" />
-		</layoutData>
-		<!-- Top Side Overall -->
-		<HBox alignItems="Center" class="sapUiSmallMarginBottom" width="100%">
-			<suite:RadialMicroChart
-				size="S"
-				percentage="{CompletenessModel>/overallProgress}"
-				valueColor="{CompletenessModel>/overallState}"
-				class="sapUiTinyMarginEnd profileCompRadialBox"
-			/>
-			<VBox class="sapUiSmallMarginBegin">
-				<Text text="Style Readiness" class="profileCompTitle"/>
-				<Text text="{CompletenessModel>/overallProgress}% complete" class="profileCompSubtitle"/>
-				<Text text="{CompletenessModel>/sectionsNeedAttention} sections need attention" class="profileCompSubtitle sapUiTinyMarginBottom"/>
-			</VBox>
-		</HBox>
-
-		<!-- Bottom Side Dense Grid -->
-		<HBox wrap="Wrap" justifyContent="SpaceBetween" items="{CompletenessModel>/sections}" width="100%">
-			<VBox class="profileCompGridItemTight">
-				<HBox width="100%" alignItems="Center" justifyContent="SpaceBetween">
-					<Text text="{CompletenessModel>name}" class="profileCompCategoryName" wrapping="false" tooltip="{CompletenessModel>name}">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-					</Text>
-					<Text text="{CompletenessModel>progress}%" class="profileCompProgressText {CompletenessModel>textClass} sapUiTinyMarginBegin" textAlign="End"/>
-				</HBox>
-				<HBox width="100%" alignItems="Center" class="profileCompBarRow">
-					<ProgressIndicator percentValue="{CompletenessModel>progress}" state="{CompletenessModel>valueColor}" height="4px" showValue="false" class="customProgressFlat {CompletenessModel>cssClass}">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-					</ProgressIndicator>
-				</HBox>
-			</VBox>
-		</HBox>
-	</VBox>
-	</HBox>
-	</HBox>
+                <!-- Bottom Side Dense Grid -->
+                <HBox
+                    wrap="Wrap"
+                    justifyContent="SpaceBetween"
+                    items="{CompletenessModel>/sections}"
+                    width="100%"
+                >
+                    <VBox class="profileCompGridItemTight">
+                        <HBox
+                            width="100%"
+                            alignItems="Center"
+                            justifyContent="SpaceBetween"
+                        >
+                            <Text
+                                text="{CompletenessModel>name}"
+                                class="profileCompCategoryName"
+                                wrapping="false"
+                                tooltip="{CompletenessModel>name}"
+                            >
+                                <layoutData>
+                                    <FlexItemData growFactor="1" />
+                                </layoutData>
+                            </Text>
+                            <Text
+                                text="{CompletenessModel>progress}%"
+                                class="profileCompProgressText {CompletenessModel>textClass} sapUiTinyMarginBegin"
+                                textAlign="End"
+                            />
+                        </HBox>
+                        <HBox
+                            width="100%"
+                            alignItems="Center"
+                            class="profileCompBarRow"
+                        >
+                            <ProgressIndicator
+                                percentValue="{CompletenessModel>progress}"
+                                state="{CompletenessModel>valueColor}"
+                                height="4px"
+                                showValue="false"
+                                class="customProgressFlat {CompletenessModel>cssClass}"
+                            >
+                                <layoutData>
+                                    <FlexItemData growFactor="1" />
+                                </layoutData>
+                            </ProgressIndicator>
+                        </HBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </HBox>
+    </HBox>
 </core:FragmentDefinition>
