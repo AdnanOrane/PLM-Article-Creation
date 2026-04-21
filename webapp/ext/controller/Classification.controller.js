@@ -279,7 +279,7 @@ sap.ui.define(
                         }),
                       );
                       oCharGroup[item].forEach((field, index) => {
-                        console.log("FieldIndex", field);
+                        // console.log("FieldIndex", field);
 
                         var bRequired = false;
 
@@ -321,7 +321,7 @@ sap.ui.define(
                           editable: bIsEditable,
                           valueHelpRequest: that.onValueHelpRequest.bind(that),
                           change: that.onCharacteristicChange.bind(that),
-                          suggest: that.onCharacteristicSuggest.bind(that),
+                          suggest: that.onCharacteristicSuggest.bind(that)
                         });
                         oInput.data("label", field.charecteristics);
                         // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
@@ -342,10 +342,13 @@ sap.ui.define(
                     });
                     // oVBox1.addItem(oSimpleForm);
                     // oSimpleForm.addContent(oHBox1);
-                    console.log(
-                      "classification Data fetched successfully:",
-                      oData,
-                    );
+                    // console.log(
+                    //   "classification Data fetched successfully:",
+                    //   oData,
+                    // );
+                    if (bSectionUpdatable) {
+                        that._syncAutoPopulatedValues(oData.results, oContextPG, oModelPG);
+                    }
                     //   }
                   },
                   error: function (oError) {
@@ -438,7 +441,7 @@ sap.ui.define(
                     that._oValueHelpDialog = null;
                   },
                   cancel: function () {
-                    console.log("Value help dialog was cancelled.");
+                    // console.log("Value help dialog was cancelled.");
                     that._oValueHelpDialog = null;
                   },
                 });
@@ -527,17 +530,42 @@ sap.ui.define(
           }
         },
 
-        onCharacteristicChange: function (oEvent) {
-          var oInput = oEvent.getSource();
-          var oView = this.base.getView();
-          var oModel = oView.getModel();
-          var oContext = oView.getBindingContext();
+        _syncAutoPopulatedValues: function (aClassificationResults, oContext, oModel) {
+            var sPath = oContext.getPath() + "/_charecteristics";
+            var oCharBinding = oModel.bindList(sPath);
+            
+            oCharBinding.requestContexts(0, 500).then(function (aContexts) {
+                aClassificationResults.forEach(function (item) {
+                    var sCharName = item.charname;
+                    var sValue = item.charvalues;
+                    
+                    if (sCharName && sValue) { // If there is an autopopulated value
+                        var oExistingContext = null;
+                        for (var i = 0; i < aContexts.length; i++) {
+                            var sCtxCharName = aContexts[i].getProperty("Charname");
+                            if (sCtxCharName && sCtxCharName.toUpperCase() === sCharName.toUpperCase()) {
+                                oExistingContext = aContexts[i];
+                                break;
+                            }
+                        }
+                        
+                        if (oExistingContext) {
+                            if (oExistingContext.getProperty("Charvalue") !== sValue) {
+                                oExistingContext.setProperty("Charvalue", sValue);
+                            }
+                        } else {
+                            oCharBinding.create({
+                                Charname: sCharName,
+                                Charvalue: sValue,
+                            });
+                        }
+                    }
+                });
+            });
+        },
 
-          var sCharName = oInput.getName();
-          var sValue = oInput.getValue() || "";
-
+        _saveCharacteristic: function(oInput, oContext, oModel, sCharName, sValue) {
           var sPath = oContext.getPath() + "/_charecteristics";
-
           var oCharBinding = oModel.bindList(sPath);
 
           oCharBinding.requestContexts(0, 500).then(function (aContexts) {
@@ -564,6 +592,77 @@ sap.ui.define(
               });
             }
           });
+        },
+
+        onCharacteristicChange: function (oEvent) {
+          var oInput = oEvent.getSource();
+          var oView = this.base.getView();
+          var oModel = oView.getModel();
+          var oContext = oView.getBindingContext();
+
+          var sCharName = oInput.getName();
+          var sValue = oInput.getValue() || "";
+
+          if (!sValue) {
+             this._saveCharacteristic(oInput, oContext, oModel, sCharName, sValue);
+             oInput.setValueState("None");
+             return;
+          }
+
+          var that = this;
+          var performValidation = function (aValues) {
+              var bValid = false;
+              var sCorrectValue = sValue;
+              for (var i = 0; i < aValues.length; i++) {
+                  if (aValues[i].desc && aValues[i].desc.toUpperCase() === sValue.toUpperCase()) {
+                      bValid = true;
+                      sCorrectValue = aValues[i].desc;
+                      break;
+                  }
+              }
+
+              if (bValid) {
+                  if (sValue !== sCorrectValue) {
+                      oInput.setValue(sCorrectValue);
+                  }
+                  that._saveCharacteristic(oInput, oContext, oModel, sCharName, sCorrectValue);
+                  oInput.setValueState("None");
+                  oInput.setValueStateText("");
+              } else {
+                  sap.m.MessageToast.show("Please select a valid value. '" + sValue + "' is not allowed.");
+                  oInput.setValueState("Error");
+                  oInput.setValueStateText("Invalid value");
+              }
+          };
+
+          var oSuggestionModel = oInput.getModel("suggestionModel");
+          if (oSuggestionModel && oSuggestionModel.getProperty("/ValueList")) {
+              performValidation(oSuggestionModel.getProperty("/ValueList"));
+          } else {
+              var strLabel = oInput.data("label");
+              if (!strLabel && oInput.oParent && oInput.oParent.mAggregations && oInput.oParent.mAggregations.label) {
+                  strLabel = oInput.oParent.mAggregations.label.getText();
+              }
+
+              var oV2Model = new sap.ui.model.odata.v2.ODataModel({
+                  serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
+              });
+              
+              sap.ui.core.BusyIndicator.show(0);
+              oV2Model.read("/valuesInputSet", {
+                  filters: [
+                      new sap.ui.model.Filter("key", sap.ui.model.FilterOperator.EQ, strLabel)
+                  ],
+                  success: function (oData) {
+                      sap.ui.core.BusyIndicator.hide();
+                      performValidation(oData.results || []);
+                  },
+                  error: function () {
+                      sap.ui.core.BusyIndicator.hide();
+                      sap.m.MessageToast.show("Error validating value.");
+                  }
+              });
+          }
         },
       },
     );

@@ -108,3 +108,31 @@ These features combine simultaneously mapping robust architectural standards:
 1. Native UI properties dynamically render dependent on external JSON models.
 2. V4 native instance controls operate entirely separated from standard logic avoiding internal Fiori Elements API crashes.
 3. Local rendering accurately correlates back directly to customized OData logic.
+
+---
+
+## Input Validation, Data Integrity & Active Drafts
+
+Recent enhancements address several core behaviors revolving around strict F4 matching rules, case sensitivity, resolving missing event sync states, and forcefully synchronizing auto-populated Fiori defaults iteratively to the internal draft schemas. 
+
+> [!NOTE] 
+> Because of the architectural complexities involving UI5 native behaviors and OData V4 list mapping mechanics, we have explicitly documented the deep-dive reasoning and implementation blocks. \
+> **Read the in-depth technical documentation here:** [Characteristic Input Handling & Draft Sync](./CHARACTERISTIC_INPUT_HANDLING.md)
+
+---
+
+
+
+---
+
+## Future Considerations
+
+1. **Mass Upload Validation**: If bulk imports are executed, characteristic validation must strictly mirror the frontend logic implemented here on backend OData validations.
+2. **Model Aggregation Sizes**: Standard limits (1000 items) are currently set for `suggestionItems` bindings via `setSizeLimit`. High-volume classification values may require transitioning to OData filtered lists directly to manage memory efficiently.
+3. **Draft Cleanup Automation**: Auto-creating missing parameters pushes overhead onto the draft. Unsaved, discarded drafts must be frequently handled by garbage collector batch jobs internally via the S/4 ABAP RAP.
+
+## Debugging Workflow
+
+- **No Characteristics Appear:** Review `bSectionUpdatable` closure inside `ext/controller/Classification.controller.js` and verify if the SAP backend returns `"__EntityControl/Updatable"` as `false` inappropriately for the test entity's layout.
+- **Valid Inputs Marked as Invalid:** Use the network tab payload resolving `/valuesInputSet?key=LabelName` to ensure the localized string mapped as the input key successfully relates to the descriptor natively configured on S/4.
+- **Draft Fails to Populate:** Confirm whether the view is being processed safely via Display Mode (which deliberately restricts `bSectionUpdatable`). If changes are needed, confirm `_saveCharacteristic` triggers via `create` or `setProperty` specifically targeting Fiori Element's internal V4 `_charecteristics` navigation paths.
