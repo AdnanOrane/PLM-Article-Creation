@@ -29,6 +29,44 @@ sap.ui.define(["sap/m/MessageToast", "sap/ui/model/Filter", "sap/ui/model/Filter
           var sKeyProperty = oValueList.Parameters[0].ValueListProperty; 
           oAddVariantController._sValueListKeyProperty = sKeyProperty; // Save for confirm handler
 
+          var fnOpenAndBindDialog = function (oDialog) {
+              // Dynamically bind to the V4 F4 Value Help model!
+              oDialog.setModel(oValueList.$model);
+
+              // Array to hold any dynamic filters from ValueHelp bindings
+              var aFilters = [];
+              if (oValueList.Parameters) {
+                  oValueList.Parameters.forEach(function (oParam) {
+                      // We only care about mapped IN parameters (which the backend provides via additionalBinding #FILTER_AND_RESULT or #FILTER)
+                      if (oParam.$Type && (oParam.$Type.indexOf("ValueListParameterIn") > -1)) {
+                          var sLocalPath = oParam.LocalDataProperty && oParam.LocalDataProperty.$PropertyPath;
+                          var sValueListProp = oParam.ValueListProperty;
+                          if (sLocalPath && sValueListProp) {
+                              // Get the value from the main entity context
+                              var sPropValue = oAddVariantController._oProductContext.getProperty(sLocalPath);
+                              if (sPropValue) {
+                                  aFilters.push(new sap.ui.model.Filter(sValueListProp, sap.ui.model.FilterOperator.EQ, sPropValue));
+                                  console.log("Applying dynamic F4 filter: " + sValueListProp + " = " + sPropValue);
+                              }
+                          }
+                      }
+                  });
+              }
+
+              // Dynamically create rows for the multi-select table
+              oDialog.bindAggregation("items", {
+                  path: sTargetCollectionPath,
+                  filters: aFilters,
+                  template: new sap.m.ColumnListItem({
+                      cells: [
+                          new sap.m.Text({ text: "{" + sKeyProperty + "}" })
+                      ]
+                  })
+              });
+
+              oDialog.open();
+          };
+
           if (!oAddVariantController._oAddVariantDialog) {
               sap.ui.core.Fragment.load({
                   id: "fragAddVariant",
@@ -37,46 +75,11 @@ sap.ui.define(["sap/m/MessageToast", "sap/ui/model/Filter", "sap/ui/model/Filter
               }).then(
                   function (oDialog) {
                       oAddVariantController._oAddVariantDialog = oDialog;
-
-                      // Dynamically bind to the V4 F4 Value Help model!
-                      oAddVariantController._oAddVariantDialog.setModel(oValueList.$model);
-
-                      // Array to hold any dynamic filters from ValueHelp bindings
-                      var aFilters = [];
-                      if (oValueList.Parameters) {
-                          oValueList.Parameters.forEach(function (oParam) {
-                              // We only care about mapped IN parameters (which the backend provides via additionalBinding #FILTER_AND_RESULT or #FILTER)
-                              if (oParam.$Type && (oParam.$Type.indexOf("ValueListParameterIn") > -1)) {
-                                  var sLocalPath = oParam.LocalDataProperty && oParam.LocalDataProperty.$PropertyPath;
-                                  var sValueListProp = oParam.ValueListProperty;
-                                  if (sLocalPath && sValueListProp) {
-                                      // Get the value from the main entity context
-                                      var sPropValue = oAddVariantController._oProductContext.getProperty(sLocalPath);
-                                      if (sPropValue) {
-                                          aFilters.push(new sap.ui.model.Filter(sValueListProp, sap.ui.model.FilterOperator.EQ, sPropValue));
-                                          console.log("Applying dynamic F4 filter: " + sValueListProp + " = " + sPropValue);
-                                      }
-                                  }
-                              }
-                          });
-                      }
-
-                      // Dynamically create rows for the multi-select table
-                      oAddVariantController._oAddVariantDialog.bindAggregation("items", {
-                          path: sTargetCollectionPath,
-                          filters: aFilters,
-                          template: new sap.m.ColumnListItem({
-                              cells: [
-                                  new sap.m.Text({ text: "{" + sKeyProperty + "}" })
-                              ]
-                          })
-                      });
-
-                      oAddVariantController._oAddVariantDialog.open();
+                      fnOpenAndBindDialog(oDialog);
                   }
               );
           } else {
-              oAddVariantController._oAddVariantDialog.open();
+              fnOpenAndBindDialog(oAddVariantController._oAddVariantDialog);
           }
       }).catch(function(oErr) {
           console.error("Error fetching Value List Info:", oErr);

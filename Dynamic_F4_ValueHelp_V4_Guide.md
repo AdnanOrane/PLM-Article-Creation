@@ -104,9 +104,46 @@ oMetaModel.requestValueListInfo(sMetaPath, true).then(function (mValueListInfo) 
     
     // Make sure the dialog shares the main service model containing the F4 endpoint
     oDialog.setModel(oModel); // Or oValueList.$model if configured differently
+    
+    // --- IMPORTANT: ALWAYS BIND AGGREGATION BEFORE OPENING ---
+    // If using the singleton pattern (if (!oDialog)), ensure this binding logic 
+    // runs EVERY time the dialog is opened, not just the first time, 
+    // otherwise filters will be stale!
     oDialog.bindAggregation("items", oListBindingInfo);
     oDialog.open();
 });
+```
+
+---
+
+## ⚠️ Common Pitfall: The Singleton Pattern & Stale Context
+
+When implementing custom dialogs in UI5, it is standard practice to use a "Singleton" or "Lazy Loading" pattern to avoid reloading the fragment XML every time.
+
+**The Bug:** If you place your `bindAggregation` and `Filter` calculation logic inside the `Fragment.load().then()` block, it will only run **once** (the first time the dialog is created). When you navigate to a different product/style and click "Add Variant" again, the dialog will simply `.open()` with the **old filters** from the previous session.
+
+**The Solution:** Extract your binding logic into a reusable helper function (e.g., `fnOpenAndBindDialog`) and call it whether the dialog is newly created OR reused.
+
+```javascript
+var fnOpenAndBind = function(oDialog) {
+    // 1. Recalculate filters based on CURRENT context
+    var aFilters = calculateFilters(oAddVariantController._oProductContext);
+    
+    // 2. Re-bind the items aggregation to refresh the list
+    oDialog.bindAggregation("items", { ... filters: aFilters ... });
+    
+    // 3. Open
+    oDialog.open();
+};
+
+if (!this._oDialog) {
+    Fragment.load(...).then(function(oDialog) {
+        this._oDialog = oDialog;
+        fnOpenAndBind(oDialog);
+    });
+} else {
+    fnOpenAndBind(this._oDialog);
+}
 ```
 
 ---

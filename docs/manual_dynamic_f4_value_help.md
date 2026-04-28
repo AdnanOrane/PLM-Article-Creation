@@ -114,3 +114,33 @@ oDialog.bindAggregation("items", {
 
 ### Why this is a powerful approach:
 If you were to rely purely on UI5's implicit behavior (as you found out), you'd have to physically print `OldCategory` out into your `AddVariantDialog.fragment.xml` DOM tree, or the layout logic engine wouldn't recognize it. By evaluating the meta model parameters explicitly in javascript, we can bypass the visual DOM layout engine entirely and extract background metadata freely.
+
+---
+
+## 🛑 CRITICAL WARNING: Stale Filters in Singleton Dialogs
+
+If you use the **Singleton Pattern** (checking `if (!this._oDialog)`) to load your fragment, you must ensure that the filter calculation and `bindAggregation` logic runs **EVERY TIME** the dialog is opened.
+
+If you leave that logic inside the `Fragment.load().then()` block, the filters will only be calculated once. Subsequent uses of the dialog for different records will show data filtered by the *first* record you ever opened.
+
+**Correct Pattern:**
+```javascript
+var fnRefreshAndOpen = function(oDialog) {
+    // 1. Calculate filters from scratch using current context
+    var aFilters = [...]; 
+    
+    // 2. Refresh the binding
+    oDialog.bindAggregation("items", { filters: aFilters, ... });
+    
+    oDialog.open();
+};
+
+if (!this._oDialog) {
+    Fragment.load(...).then(function(oDialog) {
+        this._oDialog = oDialog;
+        fnRefreshAndOpen(oDialog);
+    });
+} else {
+    fnRefreshAndOpen(this._oDialog);
+}
+```
