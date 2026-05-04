@@ -173,7 +173,7 @@
                                         },
                                         "HandoverInitiationGroup": {
                                             "type": "Menu",
-                                            "text": "Handover Initiation",
+                                            "text": "Sent For Handover Approval",
                                             "position": {
                                                 "placement": "Before",
                                                 "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
@@ -185,7 +185,7 @@
                                         },
                                         "HandoverApprovalGroup": {
                                             "type": "Menu",
-                                            "text": "Handover Approval",
+                                            "text": "Handover Accept",
                                             "position": {
                                                 "placement": "Before",
                                                 "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
