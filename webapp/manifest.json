@@ -166,9 +166,12 @@
                                             "menu": [
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setCopyStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setSMUStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setSMU_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnlineStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnline_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
-                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
                                             ]
                                         },
                                         "HandoverInitiationGroup": {
