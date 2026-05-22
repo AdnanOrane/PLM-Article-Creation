@@ -22,36 +22,87 @@ The primary objective is to restrict user inputs across the product classificati
 
 Typically, UI5 standard templates execute instance evaluations automatically. Because Classification is implemented via a custom SubSection fragment backed by custom controller logic inside `ext/controller/Classification.controller.js`, we must request these instance updates natively from the V4 structure.
 
-### 1. Extracting the Navigation Pathway
-We bind an `ODataListBinding` straight onto the parent's `_charecteristics` navigation path using the primary page V4 Model:
+To handle dynamic transitions, empty drafts, and RAP backend constraints reliably, we implement a **multi-tiered asynchronous validation strategy** executing three concurrent checks using `Promise.all`:
+
+### 1. Parent Draft Context Check
+We check feature controls on the active page context (which represents the temporary Draft entity during editing):
 ```javascript
-var sPathCh = sPath + "/_charecteristics";
-var oCharListBinding = oModelPG.bindList(sPathCh, null, null, null, {
-    $select: "__EntityControl" // Explicitly requests the hidden control data payload
+var oCurrentParentBinding = oModelPG.bindContext(sPath, null, {
+  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+});
+var pCurrentParent = oCurrentParentBinding.requestObject().then(function (oData) {
+  return {
+    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+  };
+}).catch(function (oErr) {
+  return { updatable: true, cba: true };
 });
 ```
 
-### 2. Safeguarding the Property Call (The "V4 `requestProperty`" rule)
-Since OData V4 hides implicit structural constraints under the `__EntityControl` complex type, trying to read it synchronously via `aCtx[0].getProperty("__EntityControl")` reliably results in framework crash failures directly tied to unparsed UI5 internal mappings.
-
-Instead, we extract the data using native asynchronous promises via **`requestProperty`**:
+### 2. Parent Active Entity Context Check
+If the page context is a Draft, querying certain draft features might return uninitialized states. We therefore concurrently resolve the active parent path (`IsActiveEntity=true`) and query its persistent active instance features:
 ```javascript
-oCharListBinding.requestContexts(0, 1).then(function (aCtx) {
-    if (aCtx && aCtx.length > 0) {
-        aCtx[0]
-            .requestProperty("__EntityControl/Updatable") // Async safe request explicitly
-            .then(function (bUpdatable) {
-                var bSectionUpdatable = true;
-                if (bUpdatable === false) {             // Captured directly from RAP (IF_ABAP_BEHV=>AUTH-UNAUTHORIZED)
-                    bSectionUpdatable = false;
-                }
-                _triggerClassificationRead(bSectionUpdatable);
-            })
-            // ...
-    }
-})
+var sActiveParentPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true");
+var oActiveParentBinding = oModelPG.bindContext(sActiveParentPath, null, {
+  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+});
+var pActiveParent = oActiveParentBinding.requestObject().then(function (oData) {
+  return {
+    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+  };
+}).catch(function (oErr) {
+  return { updatable: true, cba: true };
+});
 ```
-By resolving `__EntityControl/Updatable`, we mirror precisely how Fiori extracts the backend restrictions mapped from RAP's `UPDATE` instance control feature. When `bSectionUpdatable === false`, we forcibly bypass the view capability logic and set the JSON Binding `viewState>/showForm` to false effectively hiding/locking inputs gracefully.
+
+### 3. Child Characteristics Context Check
+Finally, to prevent the recurrent `"Operation is not enabled"` error thrown by OData V4 when list-binding against an uninitialized draft's children, we query the characteristics collection directly using an absolute path to the **Active Entity characteristics**:
+```javascript
+var sTargetCharListPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true") + "/_charecteristics";
+var oCharListBinding = oModelPG.bindList(sTargetCharListPath, null, null, null, {
+  $select: "__EntityControl",
+});
+var pChildCharacteristics = oCharListBinding.requestContexts(0, 1)
+  .then(function (aCtx) {
+    if (aCtx && aCtx.length > 0) {
+      return aCtx[0].requestProperty("__EntityControl/Updatable");
+    } else {
+      return null; // Empty characteristics list
+    }
+  })
+  .catch(function (oErr) {
+    return true;
+  });
+```
+
+### 4. Evaluating the Section Lock Decision
+We join all three checks concurrently. The section-wide lock (`bSectionUpdatable = false`) is triggered if:
+1. Either parent product (draft or active) is marked as not updatable (`updatable === false`).
+2. Any existing characteristic instance is marked as not updatable (`oCharUpdatableResult === false`).
+3. The characteristics list is empty, and creation of new characteristics is restricted (`cba === false`).
+
+```javascript
+Promise.all([pCurrentParent, pActiveParent, pChildCharacteristics]).then(function (aResults) {
+  var oCurrentParentResult = aResults[0];
+  var oActiveParentResult = aResults[1];
+  var oCharUpdatableResult = aResults[2];
+  var bSectionUpdatable = true;
+
+  if (oCurrentParentResult.updatable === false || oActiveParentResult.updatable === false) {
+    bSectionUpdatable = false;
+  }
+  if (oCharUpdatableResult === false) {
+    bSectionUpdatable = false;
+  }
+  if (oCharUpdatableResult === null && (oCurrentParentResult.cba === false || oActiveParentResult.cba === false)) {
+    bSectionUpdatable = false;
+  }
+
+  _triggerClassificationRead(bSectionUpdatable);
+});
+```
 
 ---
 

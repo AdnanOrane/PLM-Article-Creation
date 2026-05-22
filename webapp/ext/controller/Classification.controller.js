@@ -70,7 +70,11 @@ sap.ui.define(
               this.getView().setModel(oViewModel, "viewState");
               var oViewPG = this.base.getView();
               var oModelPG = oViewPG.getModel();
-              var oContextPG = oViewPG.getBindingContext();
+              var oContextPG = oContext || oViewPG.getBindingContext();
+              if (!oContextPG) {
+                console.error("Binding context not found in onAfterBinding!");
+                return;
+              }
               var sPath = oContextPG.getPath();
 
               var styleuuid = "";
@@ -100,18 +104,32 @@ sap.ui.define(
               var aReadOnlyProps = [];
 
               function _checkInstanceFeatureAndRead() {
-                // Safeguard: Check if object is Active Entity (Display Mode)
-                var bIsActiveEntity = oContextPG.getProperty("IsActiveEntity");
-                var bIsEditable = true;
+                var sPath = oContextPG.getPath();
+                var bIsActiveEntity = true;
 
+                if (sPath.includes("IsActiveEntity=false")) {
+                  bIsActiveEntity = false;
+                } else if (sPath.includes("IsActiveEntity=true")) {
+                  bIsActiveEntity = true;
+                } else {
+                  try {
+                    bIsActiveEntity = oContextPG.getProperty("IsActiveEntity");
+                  } catch (e) {
+                    // Ignore property lookup error in Display mode
+                  }
+                }
+                
+                var bIsEditable = true;
                 if (bIsActiveEntity === true) {
                   bIsEditable = false;
                 }
 
-                // Fallback UI model check (Fiori Elements v4)
                 var oUIModel = oViewPG.getModel("ui");
-                if (oUIModel && oUIModel.getProperty("/isEditable") === false) {
-                  bIsEditable = false;
+                if (oUIModel) {
+                  var bUIEditable = oUIModel.getProperty("/isEditable");
+                  if (bUIEditable === false) {
+                    bIsEditable = false;
+                  }
                 }
 
                 if (!bIsEditable) {
@@ -119,37 +137,91 @@ sap.ui.define(
                   return;
                 }
 
-                var sPathCh = sPath + "/_charecteristics";
+                // Edit Mode: Perform robust feature checks on both parent and child elements.
+                // 1. Current Context (Draft in edit mode)
+                var oCurrentParentBinding = oModelPG.bindContext(sPath, null, {
+                  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+                });
+                var pCurrentParent = oCurrentParentBinding.requestObject().then(function (oData) {
+                  return {
+                    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+                    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+                  };
+                }).catch(function (oErr) {
+                  return { updatable: true, cba: true };
+                });
+
+                // 2. Active Parent Context (Active persistent entity)
+                var sActiveParentPath = sPath;
+                if (sPath.includes("IsActiveEntity=false")) {
+                  sActiveParentPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true");
+                }
+                var oActiveParentBinding = oModelPG.bindContext(sActiveParentPath, null, {
+                  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+                });
+                var pActiveParent = oActiveParentBinding.requestObject().then(function (oData) {
+                  return {
+                    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+                    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+                  };
+                }).catch(function (oErr) {
+                  return { updatable: true, cba: true };
+                });
+
+                // 3. Child Characteristics list
+                var sTargetCharListPath = sPath + "/_charecteristics";
+                if (sPath.includes("IsActiveEntity=false")) {
+                  sTargetCharListPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true") + "/_charecteristics";
+                }
                 var oCharListBinding = oModelPG.bindList(
-                  sPathCh,
+                  sTargetCharListPath,
                   null,
                   null,
                   null,
                   {
                     $select: "__EntityControl",
-                  },
+                  }
                 );
-                oCharListBinding
-                  .requestContexts(0, 1)
+
+                var pChildCharacteristics = oCharListBinding.requestContexts(0, 1)
                   .then(function (aCtx) {
                     if (aCtx && aCtx.length > 0) {
-                      aCtx[0]
-                        .requestProperty("__EntityControl/Updatable")
-                        .then(function (bUpdatable) {
-                          var bSectionUpdatable = true;
-                          if (bUpdatable === false) {
-                            bSectionUpdatable = false;
-                          }
-                          _triggerClassificationRead(bSectionUpdatable);
-                        })
-                        .catch(function () {
-                          _triggerClassificationRead(true);
-                        });
+                      return aCtx[0].requestProperty("__EntityControl/Updatable");
                     } else {
-                      _triggerClassificationRead(true);
+                      return null; // Empty characteristics list
                     }
                   })
-                  .catch(function () {
+                  .catch(function (oErr) {
+                    return true;
+                  });
+
+                // Wait for all checks to complete
+                Promise.all([pCurrentParent, pActiveParent, pChildCharacteristics])
+                  .then(function (aResults) {
+                    var oCurrentParentResult = aResults[0];
+                    var oActiveParentResult = aResults[1];
+                    var oCharUpdatableResult = aResults[2];
+
+                    var bSectionUpdatable = true;
+
+                    // If either parent product (draft or active) is marked not updatable, lock the section.
+                    if (oCurrentParentResult.updatable === false || oActiveParentResult.updatable === false) {
+                      bSectionUpdatable = false;
+                    }
+
+                    // If existing characteristics are not updatable, lock the section.
+                    if (oCharUpdatableResult === false) {
+                      bSectionUpdatable = false;
+                    }
+
+                    // If characteristics list is empty, and we cannot create characteristics via association, lock the section.
+                    if (oCharUpdatableResult === null && (oCurrentParentResult.cba === false || oActiveParentResult.cba === false)) {
+                      bSectionUpdatable = false;
+                    }
+
+                    _triggerClassificationRead(bSectionUpdatable);
+                  })
+                  .catch(function (oErr) {
                     _triggerClassificationRead(true);
                   });
               }
@@ -248,29 +320,41 @@ sap.ui.define(
 
                     oHBox1.destroyItems();
                     oFlexBox.destroyItems();
-                    var oEdit = that.getView().byId("fe::StandardAction::Edit");
-                    var oDelete = that
-                      .getView()
-                      .byId("fe::StandardAction::Delete");
-                    var oEditBut = oEdit.mProperties;
-                    if (oEditBut.visible === false && oRole != "APPROVER") {
+                    var oEdit = that.base.getView().byId("fe::StandardAction::Edit") || that.getView().byId("fe::StandardAction::Edit");
+                    var oDelete = that.base.getView().byId("fe::StandardAction::Delete") || that.getView().byId("fe::StandardAction::Delete");
+                    var bEditVisible = false;
+
+                    if (oEdit) {
+                      bEditVisible = oEdit.getVisible();
+                    } else {
+                      var oUIModel = that.base.getView().getModel("ui") || that.getView().getModel("ui");
+                      if (oUIModel) {
+                        bEditVisible = !oUIModel.getProperty("/isEditable");
+                      }
+                    }
+
+                    if (bEditVisible === false && oRole !== "APPROVER") {
                       that
                         .getView()
                         .getModel("viewState")
                         .setProperty("/showForm", true);
                     } else if (
-                      oEditBut.visible === true &&
-                      oRole == "APPROVER"
+                      bEditVisible === true &&
+                      oRole === "APPROVER"
                     ) {
-                      oEdit.setVisible(false);
-                      oEdit.setEnabled(false);
-                      oDelete.setVisible(false);
-                      oDelete.setEnabled(false);
+                      if (oEdit) {
+                        oEdit.setVisible(false);
+                        oEdit.setEnabled(false);
+                      }
+                      if (oDelete) {
+                        oDelete.setVisible(false);
+                        oDelete.setEnabled(false);
+                      }
                       that
                         .getView()
                         .getModel("viewState")
                         .setProperty("/showForm", false);
-                    } else if (oEditBut.visible === true) {
+                    } else if (bEditVisible === true) {
                       that
                         .getView()
                         .getModel("viewState")
@@ -550,8 +634,7 @@ sap.ui.define(
         },
 
         _syncAutoPopulatedValues: function (aClassificationResults, oContext, oModel) {
-            var sPath = oContext.getPath() + "/_charecteristics";
-            var oCharBinding = oModel.bindList(sPath);
+            var oCharBinding = oModel.bindList("_charecteristics", oContext);
             
             oCharBinding.requestContexts(0, 500).then(function (aContexts) {
                 aClassificationResults.forEach(function (item) {
@@ -584,8 +667,7 @@ sap.ui.define(
         },
 
         _saveCharacteristic: function(oInput, oContext, oModel, sCharName, sValue) {
-          var sPath = oContext.getPath() + "/_charecteristics";
-          var oCharBinding = oModel.bindList(sPath);
+          var oCharBinding = oModel.bindList("_charecteristics", oContext);
 
           oCharBinding.requestContexts(0, 500).then(function (aContexts) {
             var oExistingContext = null;
