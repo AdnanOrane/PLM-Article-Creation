@@ -213,6 +213,23 @@
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReBOM::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.RePIR::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
                                             ]
+                                        },
+                                        "ReportGroup": {
+                                            "type": "Menu",
+                                            "text": "Report",
+                                            "position": {
+                                                "placement": "Before",
+                                                "anchor": "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                            },
+                                            "menu": [
+                                                "DataFieldForIntentBasedNavigation::ZZPP_SUM_REP::display",
+                                                "DataFieldForIntentBasedNavigation::ZZPP_ME5A::display",
+                                                "DataFieldForIntentBasedNavigation::ZZGRID_FIRM::display",
+                                                "DataFieldForIntentBasedNavigation::ZZMNM_HANDOVER1::display",
+                                                "DataFieldForIntentBasedNavigation::ZZHANDOVER_SKD::display",
+                                                "DataFieldForIntentBasedNavigation::ZZSTITCHING_DE::display",
+                                                "DataFieldForIntentBasedNavigation::ZZSTL_GARMENT_SPECS::display"
+                                            ]
                                         }
                                     }
                                 }
