@@ -228,7 +228,7 @@
                                                 "DataFieldForIntentBasedNavigation::ZZMNM_HANDOVER1::display",
                                                 "DataFieldForIntentBasedNavigation::ZZHANDOVER_SKD::display",
                                                 "DataFieldForIntentBasedNavigation::ZZSTITCHING_DE::display",
-                                                "DataFieldForIntentBasedNavigation::ZZSTL_GARMENT_SPECS::display"
+                                                "DataFieldForIntentBasedNavigation::ZZSTL_GARMENT_SPECSF::display"
                                             ]
                                         }
                                     }
