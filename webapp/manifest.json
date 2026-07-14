@@ -230,6 +230,57 @@
                                                 "DataFieldForIntentBasedNavigation::ZZSTITCHING_DE::display",
                                                 "DataFieldForIntentBasedNavigation::ZZSTL_GARMENT_SPECSF::display"
                                             ]
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setCopyStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/COPY} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setSMUStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/SMU} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setSMU_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/SMU} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnlineStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/ONL} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnline_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/ONL} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REPA} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REPI} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REPI} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.CompleteInitiation::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/HOIN} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.PartialInitiation::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/HOIN} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.PartialApprove::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/HOAP} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverApprove::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/HOAP} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.HandoverReject::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/HOAP} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ApprovalInit::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/SDAP} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReCOMP::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REOPEN} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReBOM::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REOPEN} }"
+                                        },
+                                        "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReSADD::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType": {
+                                            "visible": "{= !${plmAuth>/REOPEN} }"
                                         }
                                     }
                                 }
