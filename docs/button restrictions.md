@@ -59,9 +59,10 @@ The working approach uses **Fiori Elements v4's built-in support** for overridin
 ┌───────────┐  ┌──────────────────┐
 │ Menu      │  │ Toolbar buttons: │
 │ dropdown  │  │ Create, Delete,  │
-│ items     │  │ Approve, Reject, │
-│ (hidden)  │  │ Change Season    │
-└───────────┘  │ (hidden)         │
+│ items     │  │ SetApprove,      │
+│ (hidden)  │  │ SetReject,       │
+└───────────┘  │ Change Season    │
+               │ (hidden)         │
                └──────────────────┘
 ```
 
@@ -70,7 +71,7 @@ The working approach uses **Fiori Elements v4's built-in support** for overridin
 | Mechanism | Used For | Why |
 |-----------|----------|-----|
 | **Manifest `visible` binding** | Actions inside Menu dropdown groups (Reference Style, Handover, Reopen) | These are lazily created — only manifest-level binding works |
-| **Programmatic `setVisible()`** | Standalone toolbar buttons (Create, Delete, Approve, Reject, Change Season) | These exist in the toolbar immediately — manifest binding doesn't apply to them |
+| **Programmatic `setVisible()`** | Standalone toolbar buttons (Create, Delete, SetApprove, SetReject, Change Season) | These exist in the toolbar immediately — manifest binding doesn't apply to them |
 
 ---
 
@@ -203,17 +204,18 @@ Each `ActionAuth` code represents a **restriction** — the user should NOT see 
 
 | Auth Code | Actions Hidden | Location | Mechanism |
 |-----------|---------------|----------|-----------|
-| `CREATE` | Standard Create button, Send for approval | Toolbar | Programmatic `setVisible()` |
-| `DELETE` | Standard Delete button | Toolbar | Programmatic `setVisible()` |
+| `CREATE` | Standard Create button, Send for approval | List Report Toolbar | Programmatic `setVisible()` |
+| `DELETE` | Standard Delete button | List Report & Object Page Toolbar | Programmatic `setVisible()` |
+| `EDIT` | Standard Edit button | Object Page Toolbar | Programmatic `setVisible()` |
 | `SMU` | SMU Style (same Design Color), SMU Style (new Design Color) | Reference Style menu | Manifest binding |
 | `ONL` | Online Style (same Design Color), Online Style (new Design Color) | Reference Style menu | Manifest binding |
 | `COPY` | Copy Style | Reference Style menu | Manifest binding |
 | `REPI` | Repeat In Same Season (same Design Color), Repeat In Same Season (new Design Color) | Reference Style menu | Manifest binding |
 | `REPA` | Repeat In Another Season | Reference Style menu | Manifest binding |
-| `DSAP` | Approve, Reject | Toolbar | Programmatic `setVisible()` |
+| `DSAP` | SetApprove, SetReject (capital 'S') | List Report Toolbar | Programmatic `setVisible()` |
 | `HOIN` | Complete Handover Initiation, Partial Handover Initiation | Sent For Handover Approval menu | Manifest binding |
 | `HOAP` | Partial Handover Accept, Handover Accept, Handover Reject | Handover Accept menu | Manifest binding |
-| `CHSN` | Change Season | Toolbar | Programmatic `setVisible()` |
+| `CHSN` | Change Season | List Report Toolbar | Programmatic `setVisible()` |
 | `REOPEN` | ReCOMP, ReSADD, ReBOM | Reopen menu | Manifest binding |
 
 ---
@@ -235,6 +237,14 @@ Each `ActionAuth` code represents a **restriction** — the user should NOT see 
 - Sets the model on the view and its content for binding propagation
 - Reads `/userValidationSet` from the OData V2 service
 - Sets each returned `ActionAuth` code to `true` in the model, triggering the binding to hide the corresponding actions
+
+### [`ObjectPageExt.controller.js`](file:///e:/Orane/Fiori%20Projects/PLM%20Article%20Creation/webapp/ext/controller/ObjectPageExt.controller.js)
+
+**Changes:**
+- Implements the same programmatic button hiding logic for standard Object Page header actions.
+- Initializes the `plmAuth` JSONModel on the Object Page view during completeness calculation.
+- Fetches `/userValidationSet` OData restrictions, setting matching property flags.
+- Programmatically hides standard Edit and Delete action buttons on the Object Page toolbar if `EDIT` or `DELETE` restriction codes are returned.
 
 ---
 

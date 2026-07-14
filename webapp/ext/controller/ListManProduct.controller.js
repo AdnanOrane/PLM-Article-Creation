@@ -22,16 +22,16 @@ sap.ui.define(
               this._oAuthModel = new JSONModel({
                 CREATE: false,
                 DELETE: false,
-                SMU: true,
-                ONL: true,
-                COPY: true,
-                REPI: true,
-                REPA: true,
-                SDAP: true,
-                DSAP: true,
-                HOIN: true,
-                HOAP: true,
-                CHSN: true,
+                SMU: false,
+                ONL: false,
+                COPY: false,
+                REPI: false,
+                REPA: false,
+                SDAP: false,
+                DSAP: false,
+                HOIN: false,
+                HOAP: false,
+                CHSN: false,
                 REOPEN: false
               });
 
