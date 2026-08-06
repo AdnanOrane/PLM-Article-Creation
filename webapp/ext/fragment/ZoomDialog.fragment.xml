@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+	<Dialog id="imageZoomDialog" title="{ProductDescription}" stretch="true" 
+			horizontalScrolling="false" verticalScrolling="false"
+			class="sapUiPopupWithPadding centerDialogContent">
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Title text="{ProductDescription}" />
+				</contentLeft>
+				<contentRight>
+					<HBox alignItems="Center">
+						<Label text="Zoom:" class="sapUiTinyMarginEnd" />
+						<Slider id="imageZoomSlider" min="10" max="500" value="100" width="150px" liveChange=".onZoomChange" class="sapUiSmallMarginEnd"/>
+						<Button icon="sap-icon://decline" press=".onCloseZoomDialog" />
+					</HBox>
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<HBox id="amazonZoomContainer" width="100%" height="100%" alignItems="Center" justifyContent="Center" alignContent="Center" class="sapUiSmallMargin">
+				<VBox id="leftOriginalImageContainer" width="50%" height="600px" alignItems="Center" justifyContent="Center" class="sapUiSmallMarginEnd">
+					<Image id="leftOriginalImage" src="{ProductImage}" width="100%" mode="Image" />
+				</VBox>
+				
+				<VBox id="rightZoomedImageContainer" width="50%" height="600px" class="sapUiSmallMarginBegin" renderType="Bare">
+					<!-- Leave visible="true" so DOM is built. JS will control opacity to hide/show -->
+					<Image id="rightZoomedImage" visible="true" src="{ProductImage}" width="100%" height="100%" mode="Background" backgroundSize="200% 200%" backgroundRepeat="no-repeat" backgroundPosition="center center" />
+				</VBox>
+			</HBox>
+		</content>
+	</Dialog>
+</core:FragmentDefinition>

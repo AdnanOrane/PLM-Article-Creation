@@ -20,16 +20,46 @@ sap.ui.define(
 
           routing: {
             onAfterBinding: function (oContext) {
+              // Execute Completeness Profile early in a separate controller to separate concerns
+              var oCurrentView = this.getView() || this.base.getView();
+              var oCurrentContext =
+                oCurrentView.getBindingContext() || oContext;
+              sap.ui.require(
+                ["com/zmanprodlist/ext/controller/ObjectPageExt.controller"],
+                function (ObjExt) {
+                  ObjExt._calculateCompleteness(oCurrentContext, oCurrentView);
+                },
+              );
+
+              // Rename attachment create button to "Add" for better clarity in the UI
+              var oAttachCreate = this.base
+                .getView()
+                .byId(
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::table::_Attachment::LineItem::StandardAction::Create",
+                );
+              if (oAttachCreate) {
+                oAttachCreate.setText("Add");
+              }
+              // Reanme "Create" button to "Add UOM" in classification section for better clarity
+              var oUOMCreate = this.base
+                .getView()
+                .byId(
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::table::_Unitofmes::LineItem::StandardAction::Create",
+                );
+              if (oUOMCreate) {
+                oUOMCreate.setText("Add");
+              }
+
               var oButton = this.base
                 .getView()
                 .byId(
-                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--AddClassnew"
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--AddClassnew",
                 );
 
               var oForm = this.base
                 .getView()
                 .byId(
-                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter"
+                  "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter",
                 );
               // var bHasInputs = oForm.getContent().some(function (oControl) {
               //     return oControl instanceof sap.m.Input;
@@ -40,13 +70,27 @@ sap.ui.define(
               this.getView().setModel(oViewModel, "viewState");
               var oViewPG = this.base.getView();
               var oModelPG = oViewPG.getModel();
-              var oContextPG = oViewPG.getBindingContext();
-              var sPath = oContextPG.getPath();
-              const match = sPath.match(/styleuuid=([a-f0-9-]+)/i);
-              // var ProductId = decodeURIComponent(sPath.match(/product='(.*?)'/)[1]);
-              if (match && match[1]) {
-                var Productuuid = match[1];
+              var oContextPG = oContext || oViewPG.getBindingContext();
+              if (!oContextPG) {
+                console.error("Binding context not found in onAfterBinding!");
+                return;
               }
+              var sPath = oContextPG.getPath();
+
+              var styleuuid = "";
+              const matchStyleUuid = sPath.match(/styleuuid=([a-f0-9-]+)/i);
+              if (matchStyleUuid && matchStyleUuid[1]) {
+                styleuuid = matchStyleUuid[1];
+              }
+
+              var styleid = "";
+              const matchStyleId = sPath.match(/styleid='(.*?)'/i);
+              if (matchStyleId && matchStyleId[1]) {
+                styleid = decodeURIComponent(matchStyleId[1]);
+              }
+
+              // Keeping Productuuid assigned to styleuuid for existing logical compatibility
+              var Productuuid = styleuuid;
 
               const oView = this.getView();
               var oModel = new sap.ui.model.odata.v2.ODataModel({
@@ -55,153 +99,374 @@ sap.ui.define(
               var oResultModel = new sap.ui.model.json.JSONModel();
               var that = this;
 
-              oModel.read("/classificationSet", {
-                filters: [
+              // Fetch ReadOnly Attributes first
+              var aReadOnlyChars = [];
+              var aReadOnlyProps = [];
+
+              function _checkInstanceFeatureAndRead() {
+                var sPath = oContextPG.getPath();
+                var bIsActiveEntity = true;
+
+                if (sPath.includes("IsActiveEntity=false")) {
+                  bIsActiveEntity = false;
+                } else if (sPath.includes("IsActiveEntity=true")) {
+                  bIsActiveEntity = true;
+                } else {
+                  try {
+                    bIsActiveEntity = oContextPG.getProperty("IsActiveEntity");
+                  } catch (e) {
+                    // Ignore property lookup error in Display mode
+                  }
+                }
+                
+                var bIsEditable = true;
+                if (bIsActiveEntity === true) {
+                  bIsEditable = false;
+                }
+
+                var oUIModel = oViewPG.getModel("ui");
+                if (oUIModel) {
+                  var bUIEditable = oUIModel.getProperty("/isEditable");
+                  if (bUIEditable === false) {
+                    bIsEditable = false;
+                  }
+                }
+
+                if (!bIsEditable) {
+                  _triggerClassificationRead(false);
+                  return;
+                }
+
+                // Edit Mode: Perform robust feature checks on both parent and child elements.
+                // 1. Current Context (Draft in edit mode)
+                var oCurrentParentBinding = oModelPG.bindContext(sPath, null, {
+                  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+                });
+                var pCurrentParent = oCurrentParentBinding.requestObject().then(function (oData) {
+                  return {
+                    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+                    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+                  };
+                }).catch(function (oErr) {
+                  return { updatable: true, cba: true };
+                });
+
+                // 2. Active Parent Context (Active persistent entity)
+                var sActiveParentPath = sPath;
+                if (sPath.includes("IsActiveEntity=false")) {
+                  sActiveParentPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true");
+                }
+                var oActiveParentBinding = oModelPG.bindContext(sActiveParentPath, null, {
+                  $select: "__EntityControl/Updatable,__CreateByAssociationControl/_charecteristics"
+                });
+                var pActiveParent = oActiveParentBinding.requestObject().then(function (oData) {
+                  return {
+                    updatable: oData && oData.__EntityControl ? oData.__EntityControl.Updatable : true,
+                    cba: oData && oData.__CreateByAssociationControl ? oData.__CreateByAssociationControl._charecteristics : true
+                  };
+                }).catch(function (oErr) {
+                  return { updatable: true, cba: true };
+                });
+
+                // 3. Child Characteristics list
+                var sTargetCharListPath = sPath + "/_charecteristics";
+                if (sPath.includes("IsActiveEntity=false")) {
+                  sTargetCharListPath = sPath.replace("IsActiveEntity=false", "IsActiveEntity=true") + "/_charecteristics";
+                }
+                var oCharListBinding = oModelPG.bindList(
+                  sTargetCharListPath,
+                  null,
+                  null,
+                  null,
+                  {
+                    $select: "__EntityControl",
+                  }
+                );
+
+                var pChildCharacteristics = oCharListBinding.requestContexts(0, 1)
+                  .then(function (aCtx) {
+                    if (aCtx && aCtx.length > 0) {
+                      return aCtx[0].requestProperty("__EntityControl/Updatable");
+                    } else {
+                      return null; // Empty characteristics list
+                    }
+                  })
+                  .catch(function (oErr) {
+                    return true;
+                  });
+
+                // Wait for all checks to complete
+                Promise.all([pCurrentParent, pActiveParent, pChildCharacteristics])
+                  .then(function (aResults) {
+                    var oCurrentParentResult = aResults[0];
+                    var oActiveParentResult = aResults[1];
+                    var oCharUpdatableResult = aResults[2];
+
+                    var bSectionUpdatable = true;
+
+                    // If either parent product (draft or active) is marked not updatable, lock the section.
+                    if (oCurrentParentResult.updatable === false || oActiveParentResult.updatable === false) {
+                      bSectionUpdatable = false;
+                    }
+
+                    // If existing characteristics are not updatable, lock the section.
+                    if (oCharUpdatableResult === false) {
+                      bSectionUpdatable = false;
+                    }
+
+                    // If characteristics list is empty, and we cannot create characteristics via association, lock the section.
+                    if (oCharUpdatableResult === null && (oCurrentParentResult.cba === false || oActiveParentResult.cba === false)) {
+                      bSectionUpdatable = false;
+                    }
+
+                    _triggerClassificationRead(bSectionUpdatable);
+                  })
+                  .catch(function (oErr) {
+                    _triggerClassificationRead(true);
+                  });
+              }
+
+              oModel.read("/ReadOnlyCharSetSet", {
+                success: function (oDataRO) {
+                  if (oDataRO && oDataRO.results) {
+                    aReadOnlyChars = oDataRO.results.map(function (item) {
+                      return item.Charname ? item.Charname.toUpperCase() : "";
+                    });
+                    oDataRO.results.forEach(function (item) {
+                      if (item.Charname) {
+                        aReadOnlyProps.push({
+                          charname: item.Charname.toUpperCase(),
+                          type: item.Type ? item.Type.toUpperCase() : "",
+                        });
+                      }
+                    });
+                  }
+                  _checkInstanceFeatureAndRead();
+                },
+                error: function () {
+                  console.error("Failed to fetch ReadOnlyCharSet");
+                  _checkInstanceFeatureAndRead();
+                },
+              });
+
+              function _triggerClassificationRead(bSectionUpdatable) {
+                var aFilters = [
                   new sap.ui.model.Filter(
                     "Productuuid",
                     sap.ui.model.FilterOperator.EQ,
-                    Productuuid
+                    Productuuid,
                   ),
-                  // new sap.ui.model.Filter("Material", sap.ui.model.FilterOperator.EQ, ProductId)
-                ],
-                success: function (oData, oResponse) {
-                  oResultModel.setData(oData.results);
-                  // var oForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
-                  // var bHasInputs = oForm.getContent().some(function (oControl) {
-                  //     return oControl instanceof sap.m.Input;
-                  // });;
+                ];
 
-                  that.getView().setModel(oResultModel, "classSet");
-                  const oCharGroup = {};
-                  var oRole;
-                  oData.results.forEach((item) => {
-                    oRole = item.Role;
-                    if (!oCharGroup[item.classname]) {
-                      oCharGroup[item.classname] = [];
-                    }
-                    var oCharval = {};
-                    if (item.charecteristics != "") {
-                      oCharval.charecteristics = item.charecteristics;
-                      oCharval.charvalues = item.charvalues;
-                      oCharGroup[item.classname].push(oCharval);
-                    }
-                  });
+                if (styleuuid) {
+                  aFilters.push(
+                    new sap.ui.model.Filter(
+                      "styleuuid",
+                      sap.ui.model.FilterOperator.EQ,
+                      styleuuid,
+                    ),
+                  );
+                }
 
-                  var oHBox1 = that
-                    .getView()
-                    .byId(
-                      "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1"
-                    );
-                  var oFlexBox = that
-                    .getView()
-                    .byId(
-                      "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--FlexBox1"
-                    );
-                  // var oSimpleForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
+                if (styleid) {
+                  aFilters.push(
+                    new sap.ui.model.Filter(
+                      "styleid",
+                      sap.ui.model.FilterOperator.EQ,
+                      styleid,
+                    ),
+                  );
+                }
 
-                  //    oSimpleForm.destroyContent( );
+                oModel.read("/classificationSet", {
+                  filters: aFilters,
+                  success: function (oData, oResponse) {
+                    oResultModel.setData(oData.results);
+                    // var oForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
+                    // var bHasInputs = oForm.getContent().some(function (oControl) {
+                    //     return oControl instanceof sap.m.Input;
+                    // });;
 
-                  oHBox1.destroyItems();
-                  oFlexBox.destroyItems();
-                  var oEdit = that.getView().byId("fe::StandardAction::Edit");
-                  var oDelete = that
-                    .getView()
-                    .byId("fe::StandardAction::Delete");
-                  var oEditBut = oEdit.mProperties;
-                  if (oEditBut.visible === false && oRole != "APPROVER") {
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", true);
-                    var oButton = new sap.m.Button({
-                      text: "Add Attributes",
-                      press: that.onAddCharacteristic.bind(that),
-                    });
-                    oButton.setLayoutData(
-                      new sap.ui.layout.GridData({
-                        span: "XL2 L2 M3 S12",
-                      })
-                    );
-
-                    // oSimpleForm.addContent(oButton);
-                  } else if (oEditBut.visible === true && oRole == "APPROVER") {
-                    oEdit.setVisible(false);
-                    oEdit.setEnabled(false);
-                    oDelete.setVisible(false);
-                    oDelete.setEnabled(false);
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", false);
-                  } else if (oEditBut.visible === true) {
-                    that
-                      .getView()
-                      .getModel("viewState")
-                      .setProperty("/showForm", false);
-                  }
-
-                  Object.keys(oCharGroup).forEach((item) => {
-                    var oSimpleForm = new sap.ui.layout.form.SimpleForm({
-                      layout: "ColumnLayout",
-                      columnsM: 2,
-                      columnsL: 3,
-                      columnsXL: 4,
+                    that.getView().setModel(oResultModel, "classSet");
+                    const oCharGroup = {};
+                    var oRole;
+                    oData.results.forEach((item) => {
+                      oRole = item.Role;
+                      if (!oCharGroup[item.classname]) {
+                        oCharGroup[item.classname] = [];
+                      }
+                      var oCharval = {};
+                      if (item.charecteristics != "") {
+                        oCharval.charecteristics = item.charecteristics;
+                        oCharval.charvalues = item.charvalues;
+                        oCharval.charname = item.charname;
+                        oCharGroup[item.classname].push(oCharval);
+                      }
                     });
 
-                    oSimpleForm.addContent(
-                      new sap.ui.core.Title({
-                        text: item,
-                      })
-                    );
-                    oCharGroup[item].forEach((field, index) => {
-                      console.log("FieldIndex", field);
+                    var oHBox1 = that
+                      .getView()
+                      .byId(
+                        "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1",
+                      );
+                    var oFlexBox = that
+                      .getView()
+                      .byId(
+                        "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--FlexBox1",
+                      );
+                    // var oSimpleForm = that.base.getView().byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--idCharecter");
 
-                      var oLabel = new sap.m.Label({
-                        text: field.charecteristics,
+                    //    oSimpleForm.destroyContent( );
+
+                    oHBox1.destroyItems();
+                    oFlexBox.destroyItems();
+                    var oEdit = that.base.getView().byId("fe::StandardAction::Edit") || that.getView().byId("fe::StandardAction::Edit");
+                    var oDelete = that.base.getView().byId("fe::StandardAction::Delete") || that.getView().byId("fe::StandardAction::Delete");
+                    var bEditVisible = false;
+
+                    if (oEdit) {
+                      bEditVisible = oEdit.getVisible();
+                    } else {
+                      var oUIModel = that.base.getView().getModel("ui") || that.getView().getModel("ui");
+                      if (oUIModel) {
+                        bEditVisible = !oUIModel.getProperty("/isEditable");
+                      }
+                    }
+
+                    if (bEditVisible === false && oRole !== "APPROVER") {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", true);
+                    } else if (
+                      bEditVisible === true &&
+                      oRole === "APPROVER"
+                    ) {
+                      if (oEdit) {
+                        oEdit.setVisible(false);
+                        oEdit.setEnabled(false);
+                      }
+                      if (oDelete) {
+                        oDelete.setVisible(false);
+                        oDelete.setEnabled(false);
+                      }
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    } else if (bEditVisible === true) {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    }
+
+                    if (bSectionUpdatable === false) {
+                      that
+                        .getView()
+                        .getModel("viewState")
+                        .setProperty("/showForm", false);
+                    }
+
+                    Object.keys(oCharGroup).forEach((item) => {
+                      var oSimpleForm = new sap.ui.layout.form.SimpleForm({
+                        layout: "ColumnLayout",
+                        columnsM: 2,
+                        columnsL: 3,
+                        columnsXL: 6,
                       });
 
-                      var oInput = new sap.m.Input({
-                        value: field.charvalues,
-                        showValueHelp: true,
-                        width: "10rem",
-                        name: "input_" + index,
-                        editable: "{viewState>/showForm}",
-                        valueHelpRequest: that.onValueHelpRequest.bind(that),
-                      });
-                      // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
-                      // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
-                      // oLabel.setLayoutData(new sap.ui.layout.GridData({
-                      //     // span: "L3 M3 S12"
-                      //     span: "XL4 L2 M4 S6"
-                      // }));
-                      // oInput.setLayoutData(new sap.ui.layout.GridData({
-                      //     // span: "L9 M9 S12"
-                      //     span: "XL4 L2 M4 S6"
-                      // }));
+                      oSimpleForm.addContent(
+                        new sap.ui.core.Title({
+                          text: item,
+                        }),
+                      );
+                      oCharGroup[item].forEach((field, index) => {
+                        // console.log("FieldIndex", field);
 
-                      oSimpleForm.addContent(oLabel);
-                      oSimpleForm.addContent(oInput);
+                        var bRequired = false;
+
+                        var sUpperCharName = field.charname
+                          ? field.charname.toUpperCase()
+                          : "";
+                        var oMatchedProp = aReadOnlyProps.find(function (p) {
+                          return p.charname === sUpperCharName;
+                        });
+                        var sType = oMatchedProp ? oMatchedProp.type : "";
+
+                        if (sType === "M") {
+                          bRequired = true;
+                        }
+
+                        var oLabel = new sap.m.Label({
+                          text: field.charecteristics,
+                          required: bRequired,
+                        });
+
+                        var bIsEditable = "{viewState>/showForm}";
+                        if (sType === "D") {
+                          bIsEditable = false;
+                        } else if (
+                          aReadOnlyChars.includes(sUpperCharName) &&
+                          sType !== "M"
+                        ) {
+                          bIsEditable = false;
+                        }
+
+                        var oInput = new sap.m.Input({
+                          value: field.charvalues,
+                          showValueHelp: true,
+                          autocomplete: true,
+                          showSuggestion: true,
+                          filterSuggests: false,
+                          width: "10rem",
+                          name: field.charname,
+                          editable: bIsEditable,
+                          valueHelpRequest: that.onValueHelpRequest.bind(that),
+                          change: that.onCharacteristicChange.bind(that),
+                          suggest: that.onCharacteristicSuggest.bind(that)
+                        });
+                        oInput.data("label", field.charecteristics);
+                        // oLabel.setLayoutData(new sap.ui.layout.GridData({ span: "L4 M4 S12" }));
+                        // oInput.setLayoutData(new sap.ui.layout.GridData({ span: "L8 M8 S12" }));
+                        // oLabel.setLayoutData(new sap.ui.layout.GridData({
+                        //     // span: "L3 M3 S12"
+                        //     span: "XL4 L2 M4 S6"
+                        // }));
+                        // oInput.setLayoutData(new sap.ui.layout.GridData({
+                        //     // span: "L9 M9 S12"
+                        //     span: "XL4 L2 M4 S6"
+                        // }));
+
+                        oSimpleForm.addContent(oLabel);
+                        oSimpleForm.addContent(oInput);
+                      });
+                      oHBox1.addItem(oSimpleForm);
                     });
-                    oHBox1.addItem(oSimpleForm);
-                  });
-                  // oVBox1.addItem(oSimpleForm);
-                  // oSimpleForm.addContent(oHBox1);
-                  oFlexBox.addItem(oButton);
-                  console.log("Data fetched successfully:", oData);
-                  //   }
-                },
-                error: function (oError) {
-                  // Handle error
-                  console.error("Error fetching data:", oError);
-                },
-              });
+                    // oVBox1.addItem(oSimpleForm);
+                    // oSimpleForm.addContent(oHBox1);
+                    // console.log(
+                    //   "classification Data fetched successfully:",
+                    //   oData,
+                    // );
+                    if (bSectionUpdatable) {
+                        that._syncAutoPopulatedValues(oData.results, oContextPG, oModelPG);
+                    }
+                    //   }
+                  },
+                  error: function (oError) {
+                    // Handle error
+                    console.error(
+                      "Error fetching classification data:",
+                      oError,
+                    );
+                  },
+                });
+              }
             },
-            onBeforeNavigation: function (oEvent) {
-              debugger;
-            },
+            onBeforeNavigation: function (oEvent) {},
           },
         },
-
         onValueHelpRequest: function (oEvent) {
           var oInput = oEvent.getSource();
           var oInp = oEvent.getSource();
@@ -220,7 +485,15 @@ sap.ui.define(
           //         console.log(aInputs[i]);
           //     }
           // }
-          var strLabel = oInput.oParent.mAggregations.label.getText();
+          var strLabel = oInput.data("label");
+          if (
+            !strLabel &&
+            oInput.oParent &&
+            oInput.oParent.mAggregations &&
+            oInput.oParent.mAggregations.label
+          ) {
+            strLabel = oInput.oParent.mAggregations.label.getText();
+          }
           //strLabel = strLabel.replace(/\s+/g, "");
           var oModel = new sap.ui.model.odata.v2.ODataModel({
             serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
@@ -232,7 +505,7 @@ sap.ui.define(
               new sap.ui.model.Filter(
                 "key",
                 sap.ui.model.FilterOperator.EQ,
-                strLabel
+                strLabel,
               ),
             ],
             success: function (oData) {
@@ -257,7 +530,7 @@ sap.ui.define(
                     var oFilter = new sap.ui.model.Filter(
                       "desc",
                       sap.ui.model.FilterOperator.Contains,
-                      sValue
+                      sValue,
                     );
                     var oBinding = oEvent.getSource().getBinding("items");
                     oBinding.filter([oFilter]);
@@ -266,11 +539,12 @@ sap.ui.define(
                     var oSelectedItem = oEvent.getParameter("selectedItem");
                     if (oSelectedItem) {
                       oInput.setValue(oSelectedItem.getTitle());
+                      oInput.fireChange({ value: oSelectedItem.getTitle() });
                     }
                     that._oValueHelpDialog = null;
                   },
                   cancel: function () {
-                    console.log("Value help dialog was cancelled.");
+                    // console.log("Value help dialog was cancelled.");
                     that._oValueHelpDialog = null;
                   },
                 });
@@ -285,81 +559,213 @@ sap.ui.define(
           });
         },
 
-        onAddCharacteristic: function (oEvent) {
+        onCharacteristicSuggest: function (oEvent) {
+          var oInput = oEvent.getSource();
+          var sTerm = oEvent.getParameter("suggestValue");
+
+          var strLabel = oInput.data("label");
+          if (
+            !strLabel &&
+            oInput.oParent &&
+            oInput.oParent.mAggregations &&
+            oInput.oParent.mAggregations.label
+          ) {
+            strLabel = oInput.oParent.mAggregations.label.getText();
+          }
+
+          if (
+            !oInput.getModel("suggestionModel") &&
+            !oInput.data("fetchingSuggestions")
+          ) {
+            oInput.data("fetchingSuggestions", true);
+            var oModel = new sap.ui.model.odata.v2.ODataModel({
+              serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
+            });
+
+            oModel.read("/valuesInputSet", {
+              filters: [
+                new sap.ui.model.Filter(
+                  "key",
+                  sap.ui.model.FilterOperator.EQ,
+                  strLabel,
+                ),
+              ],
+              success: function (oData) {
+                var oVHModel = new sap.ui.model.json.JSONModel({
+                  ValueList: oData.results,
+                });
+                oVHModel.setSizeLimit(1000);
+                oInput.setModel(oVHModel, "suggestionModel");
+
+                oInput.bindAggregation("suggestionItems", {
+                  path: "suggestionModel>/ValueList",
+                  template: new sap.ui.core.Item({
+                    text: "{suggestionModel>desc}",
+                    key: "{suggestionModel>desc}",
+                  }),
+                });
+
+                var oBinding = oInput.getBinding("suggestionItems");
+                if (oBinding) {
+                  var sCurrentValue = oInput.getValue();
+                  var oFilter = new sap.ui.model.Filter(
+                    "desc",
+                    sap.ui.model.FilterOperator.Contains,
+                    sCurrentValue,
+                  );
+                  oBinding.filter([oFilter]);
+                }
+              },
+              error: function () {
+                oInput.data("fetchingSuggestions", false);
+              },
+            });
+          } else if (oInput.getModel("suggestionModel")) {
+            var oBinding = oInput.getBinding("suggestionItems");
+            if (oBinding) {
+              var oFilter = new sap.ui.model.Filter(
+                "desc",
+                sap.ui.model.FilterOperator.Contains,
+                sTerm,
+              );
+              oBinding.filter([oFilter]);
+            }
+          }
+        },
+
+        _syncAutoPopulatedValues: function (aClassificationResults, oContext, oModel) {
+            var oCharBinding = oModel.bindList("_charecteristics", oContext);
+            
+            oCharBinding.requestContexts(0, 500).then(function (aContexts) {
+                aClassificationResults.forEach(function (item) {
+                    var sCharName = item.charname;
+                    var sValue = item.charvalues;
+                    
+                    if (sCharName && sValue) { // If there is an autopopulated value
+                        var oExistingContext = null;
+                        for (var i = 0; i < aContexts.length; i++) {
+                            var sCtxCharName = aContexts[i].getProperty("Charname");
+                            if (sCtxCharName && sCtxCharName.toUpperCase() === sCharName.toUpperCase()) {
+                                oExistingContext = aContexts[i];
+                                break;
+                            }
+                        }
+                        
+                        if (oExistingContext) {
+                            if (oExistingContext.getProperty("Charvalue") !== sValue) {
+                                oExistingContext.setProperty("Charvalue", sValue);
+                            }
+                        } else {
+                            oCharBinding.create({
+                                Charname: sCharName,
+                                Charvalue: sValue,
+                            });
+                        }
+                    }
+                });
+            });
+        },
+
+        _saveCharacteristic: function(oInput, oContext, oModel, sCharName, sValue) {
+          var oCharBinding = oModel.bindList("_charecteristics", oContext);
+
+          oCharBinding.requestContexts(0, 500).then(function (aContexts) {
+            var oExistingContext = null;
+
+            aContexts.forEach(function (oCtx) {
+              var sCtxCharName = oCtx.getProperty("Charname");
+              if (
+                sCtxCharName &&
+                sCtxCharName.toUpperCase() === sCharName.toUpperCase()
+              ) {
+                oExistingContext = oCtx;
+              }
+            });
+
+            if (oExistingContext) {
+              if (oExistingContext.getProperty("Charvalue") !== sValue) {
+                oExistingContext.setProperty("Charvalue", sValue);
+              }
+            } else {
+              oCharBinding.create({
+                Charname: sCharName,
+                Charvalue: sValue,
+              });
+            }
+          });
+        },
+
+        onCharacteristicChange: function (oEvent) {
+          var oInput = oEvent.getSource();
           var oView = this.base.getView();
           var oModel = oView.getModel();
           var oContext = oView.getBindingContext();
-          //var oVBox = oView.byId("com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--vBox1");
-          var oPanel = this.getView().byId(
-            "com.zmanprodlist::zc_cdsv_man_productObjectPage--fe::CustomSubSection::Classification--HBox1"
-          );
-          var aInputs = oPanel.findAggregatedObjects(true, function (oControl) {
-            return oControl.isA("sap.m.Input");
-          });
 
-          var oPayload = {};
-          //    var aCharValues = [];
-          //    aInputs.forEach(function (oInput) {
-          //        var sCharVal = oInput.getValue();
-          //       var  sCharName =oInput.oParent.mAggregations.label.getText( );
-          //         aCharValues.push({CharName : sCharName,CharValue : sCharVal});
-          //     });
-          var sPath = oContext.getPath() + "/_charecteristics";
-          const match = sPath.match(/styleuuid=([a-f0-9-]+)/i);
-          // var ProductId = decodeURIComponent(sPath.match(/product='(.*?)'/)[1]);
-          if (match && match[1]) {
-            var Productuuid = match[1];
+          var sCharName = oInput.getName();
+          var sValue = oInput.getValue() || "";
+
+          if (!sValue) {
+             this._saveCharacteristic(oInput, oContext, oModel, sCharName, sValue);
+             oInput.setValueState("None");
+             return;
           }
-          var aCharValues = aInputs.map(function (oInput) {
-            var sLabel = oInput.oParent.mAggregations.label.getText(); // assumes label is sibling
-            return {
-              Charname: sLabel,
-              Charvalue: oInput.getValue(),
-            };
-          });
-          // var oCharBinding = oModel.bindList(oContext.getPath() + "/_charecteristics", oContext, {
-          //     $$groupId: "updateGroup"
-          // });
 
-          var oCharBinding = oModel.bindList(sPath, {
-            sorters: [
-              {
-                path: "charname",
-              },
-            ],
-          });
-          var oEnableChar = this.getView()
-            .getModel("viewState")
-            .getProperty("/showForm");
-          if (oEnableChar === false) {
-            this.getView().getModel("viewState").setProperty("/showForm", true);
-            MessageToast.show("Charecteristics is Enabled");
-          } else {
-            this.getView()
-              .getModel("viewState")
-              .setProperty("/showForm", false);
-            MessageToast.show("Charecteristics is saved");
-            oCharBinding.requestContexts(0, 100).then(function (aContexts) {
-              aCharValues.forEach(function (oNewChar, index) {
-                if (aContexts.length === 0) {
-                  oCharBinding.create(oNewChar);
-                } else {
-                  var oCntx = aContexts[index];
-                  var oChar = oCntx.getObject();
-
-                  if (oChar.Charname === oNewChar.Charname) {
-                    // Update existing
-                    oCntx.setProperty("Charvalue", oNewChar.Charvalue);
-                    oCntx.setProperty("Charname", oNewChar.Charname);
+          var that = this;
+          var performValidation = function (aValues) {
+              var bValid = false;
+              var sCorrectValue = sValue;
+              for (var i = 0; i < aValues.length; i++) {
+                  if (aValues[i].desc && aValues[i].desc.toUpperCase() === sValue.toUpperCase()) {
+                      bValid = true;
+                      sCorrectValue = aValues[i].desc;
+                      break;
                   }
-                }
-              });
-            });
-          }
+              }
 
-          //             this.getView().getModel("viewState").setProperty("/showForm", false);
+              if (bValid) {
+                  if (sValue !== sCorrectValue) {
+                      oInput.setValue(sCorrectValue);
+                  }
+                  that._saveCharacteristic(oInput, oContext, oModel, sCharName, sCorrectValue);
+                  oInput.setValueState("None");
+                  oInput.setValueStateText("");
+              } else {
+                  sap.m.MessageToast.show("Please select a valid value. '" + sValue + "' is not allowed.");
+                  oInput.setValueState("Error");
+                  oInput.setValueStateText("Invalid value");
+              }
+          };
+
+          var oSuggestionModel = oInput.getModel("suggestionModel");
+          if (oSuggestionModel && oSuggestionModel.getProperty("/ValueList")) {
+              performValidation(oSuggestionModel.getProperty("/ValueList"));
+          } else {
+              var strLabel = oInput.data("label");
+              if (!strLabel && oInput.oParent && oInput.oParent.mAggregations && oInput.oParent.mAggregations.label) {
+                  strLabel = oInput.oParent.mAggregations.label.getText();
+              }
+
+              var oV2Model = new sap.ui.model.odata.v2.ODataModel({
+                  serviceUrl: "/sap/opu/odata/sap/ZOD_MM_CLASSIF_CREATE_SRV",
+              });
+              
+              sap.ui.core.BusyIndicator.show(0);
+              oV2Model.read("/valuesInputSet", {
+                  filters: [
+                      new sap.ui.model.Filter("key", sap.ui.model.FilterOperator.EQ, strLabel)
+                  ],
+                  success: function (oData) {
+                      sap.ui.core.BusyIndicator.hide();
+                      performValidation(oData.results || []);
+                  },
+                  error: function () {
+                      sap.ui.core.BusyIndicator.hide();
+                      sap.m.MessageToast.show("Error validating value.");
+                  }
+              });
+          }
         },
-      }
+      },
     );
-  }
+  },
 );

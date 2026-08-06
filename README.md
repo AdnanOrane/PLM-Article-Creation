@@ -25,6 +25,14 @@ The application implements robust logic to enable or disable specific functional
 - **Action Control**: standard and custom actions are dynamically hidden or shown based on the `ActionAuth` property (e.g., `CREATE`, `DELETE`, `SMU`, `ONL`, `COPY`, `REPI`, `REPA`, `DSAP`, `HOIN`, `HOAP`).
 - **Logic Location**: `webapp/ext/controller/ListManProduct.controller.js`.
 
+### 3. Interactive Product Image Zoom
+
+A dynamic overlay system providing interactive inspection of styling features and merchandise directly from the Object Page.
+
+- **Amazon-Style Interaction**: Hovering cleanly translates cursor positioning into scaled perspective zoom.
+- **Native DOM Optimizaton**: The event handling deliberately bypasses Fiori event throttling boundaries to calculate mouse tracking algorithm vectors in real-time.
+- **Logic Location**: `webapp/ext/controller/ObjectPageExt.controller.js` & `webapp/ext/fragment/ZoomDialog.fragment.xml`.
+
 ## Technical Architecture
 
 ### Frameworks & Tools
@@ -91,3 +99,12 @@ npm run build
   - `localService/`: Mock data and metadata.
   - `i18n/`: Internationalization files.
 - `ui5.yaml`: UI5 tooling configuration.
+
+## Documentation
+
+Detailed technical documentation for custom features lives in the [`docs/`](./docs/) folder.
+
+| Document | Description |
+|---|---|
+| [Profile Completeness Widget](./docs/profile-completeness-widget.md) | How the Style Readiness chart works — all sections, calculation strategies, data sources, CSS classes, and how to add new sections |
+| [Product Image Zoom Feature](./docs/PRODUCT_IMAGE_ZOOM.md) | Explains the Amazon-style dual-pane DOM tracking engine, algorithm math overrides, hover event integrations, and glitch preventions |

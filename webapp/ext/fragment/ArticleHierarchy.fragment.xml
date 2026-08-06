@@ -1,0 +1,73 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:macros="sap.fe.macros">
+	<HBox wrap="Wrap" alignItems="Center" class="hierarchyContainer" core:require="{ handler: 'com/zmanprodlist/ext/fragment/ArticleHierarchy'}">
+		<!-- L1 -->
+		<VBox visible="{= ${Hierarchy1Text} !== null &amp;&amp; ${Hierarchy1Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-copyright hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 1" class="hierarchyLevelText" />
+			<Text text="{Hierarchy1Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy1Text} !== null &amp;&amp; ${Hierarchy1Text} !== '' &amp;&amp; ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' }" />
+
+		<!-- L2 -->
+		<VBox visible="{= ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-building hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 2" class="hierarchyLevelText" />
+			<Text text="{Hierarchy2Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy2Text} !== null &amp;&amp; ${Hierarchy2Text} !== '' &amp;&amp; ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' }" />
+
+		<!-- L3 -->
+		<VBox visible="{= ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-venus-mars hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 3" class="hierarchyLevelText" />
+			<Text text="{Hierarchy3Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy3Text} !== null &amp;&amp; ${Hierarchy3Text} !== '' &amp;&amp; ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' }" />
+
+		<!-- L4 -->
+		<VBox visible="{= ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-sitemap hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 4" class="hierarchyLevelText" />
+			<Text text="{Hierarchy4Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy4Text} !== null &amp;&amp; ${Hierarchy4Text} !== '' &amp;&amp; ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' }" />
+
+		<!-- L5 -->
+		<VBox visible="{= ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-layer-group hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 5" class="hierarchyLevelText" />
+			<Text text="{Hierarchy5Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy5Text} !== null &amp;&amp; ${Hierarchy5Text} !== '' &amp;&amp; ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' }" />
+
+		<!-- L6 -->
+		<VBox visible="{= ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-shapes hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 6" class="hierarchyLevelText" />
+			<Text text="{Hierarchy6Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+		<core:Icon src="sap-icon://project-definition-triangle-2" class="hierarchySeparator" visible="{= ${Hierarchy6Text} !== null &amp;&amp; ${Hierarchy6Text} !== '' &amp;&amp; ${Hierarchy7Text} !== null &amp;&amp; ${Hierarchy7Text} !== '' }" />
+
+		<!-- L7 -->
+		<VBox visible="{= ${Hierarchy7Text} !== null &amp;&amp; ${Hierarchy7Text} !== '' }" class="hierarchyCard" alignItems="Center">
+			<VBox class="hierarchyIconBox" justifyContent="Center" alignItems="Center">
+				<core:HTML content="&lt;i class='fa-solid fa-tags hierarchyExternalIcon'&gt;&lt;/i&gt;" />
+			</VBox>
+			<Text text="Hierarchy 7" class="hierarchyLevelText" />
+			<Text text="{Hierarchy7Text}" class="hierarchyMainText" wrapping="true" />
+		</VBox>
+
+	</HBox>
+</core:FragmentDefinition>
