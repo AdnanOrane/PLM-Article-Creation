@@ -10,7 +10,7 @@ server:
         ignoreCertErrors: false
         backend:
           - path: /sap
-            url: https://bibawebdisp.bibaapps.com:50500
+            url: https://bibawebdisp.bibaapps.com:50500/
             client: "120"
         ui5:
           path:

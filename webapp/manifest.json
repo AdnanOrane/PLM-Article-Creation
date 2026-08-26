@@ -53,7 +53,7 @@
         }
     },
     "sap.ui5": {
-        "flexEnabled": false,
+        "flexEnabled": true,
         "dependencies": {
             "minUI5Version": "1.120.14",
             "libs": {
@@ -171,7 +171,9 @@
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setOnline_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
                                                 "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatStyle::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
-                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.setRepeatInseason_WND::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReSMU::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType",
+                                                "DataFieldForAction::com.sap.gateway.srvd.zsd_man_product.v0001.ReONLINE::com.sap.gateway.srvd.zsd_man_product.v0001.zc_cdsv_man_productType"
                                             ]
                                         },
                                         "HandoverInitiationGroup": {
@@ -450,5 +452,20 @@
     "sap.fiori": {
         "registrationIds": [],
         "archeType": "transactional"
+    },
+    "sap.fe": {
+        "historySettings": {
+            "fields": {
+                "product": {
+                    "historyEnabled": true
+                },
+                "Style": {
+                    "historyEnabled": true
+                },
+                "styleid": {
+                    "historyEnabled": true
+                }
+            }
+        }
     }
 }

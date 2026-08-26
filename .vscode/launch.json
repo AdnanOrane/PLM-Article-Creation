@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start PLM Artcile Creation",
+            "name": "Start Article Creation",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -27,7 +27,7 @@
             }
         },
         {
-            "name": "Start PLM Artcile Creation Mock",
+            "name": "Start Article Creation Mock",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -53,7 +53,7 @@
             }
         },
         {
-            "name": "Start PLM Artcile Creation Local",
+            "name": "Start Article Creation Local",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
